@@ -21,6 +21,8 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          ALERTS_EMAIL: ${{ secrets.ALERTS_EMAIL }}
+          ALERTS_APP_PASSWORD: ${{ secrets.ALERTS_APP_PASSWORD }}
       - name: Remember what was sent
         run: |
           git config user.name "job-digest-bot"

@@ -12,6 +12,7 @@ boards list it.
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
   Foxconn, DocuSign, GitHub, MathWorks, ...
 - The SimplifyJobs internship list and Y Combinator startups
+- Job-alert emails in your inbox (Handshake so far), read without changing anything
 
 Edit [config.py](config.py) to change roles, regions or companies. A company that can't
 be read on a given day is listed at the bottom of the email instead of breaking it.
@@ -30,6 +31,10 @@ Jobs already sent are remembered in `seen.json`, which the Action updates on its
    - `GMAIL_ADDRESS`: the Gmail account that sends the digest
    - `GMAIL_APP_PASSWORD`: the password from step 1
    - `TO_EMAIL` (optional): where to send it; defaults to `GMAIL_ADDRESS`
+   - `ALERTS_EMAIL` and `ALERTS_APP_PASSWORD` (optional): the Gmail inbox that receives
+     your Handshake/LinkedIn/... alerts, if it isn't `GMAIL_ADDRESS`. Needs its own app
+     password. Alerts sent to other inboxes (e.g. a school address) can be auto-forwarded
+     there with a Gmail filter.
 4. **Test.** Actions tab → "Daily design internship digest" → Run workflow.
 
 ## Preview locally

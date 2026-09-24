@@ -867,6 +867,67 @@ def from_isite(site):
             for jid, j in found.items()]
 
 
+# ---------- job-alert emails (Handshake, ...) ----------
+
+def unwrap_link(url):
+    """Undo UW's urldefense.com link wrapping so links go straight to the site."""
+    url = html.unescape(url)
+    m = re.match(r"https://urldefense\.com/v3/__(.+?)__;", url)
+    return m.group(1) if m else url
+
+
+def parse_handshake(body):
+    """Handshake job round-ups: each card is <a><span>company</span><span>title</span>
+    <span>"$20–30/hr • Internship • Vienna, VA (Hybrid)"</span></a>."""
+    out = []
+    card = re.compile(r'<a[^>]*href="([^"]+)"[^>]*>\s*<span[^>]*>([^<]*)</span>\s*'
+                      r'<span[^>]*>([^<]*)</span>\s*<span[^>]*>([^<]*)</span>\s*</a>')
+    for href, company, title, meta in card.findall(body):
+        company, title, meta = text_of(company), text_of(title), text_of(meta)
+        parts = [p.strip() for p in meta.split("•")]
+        intern = "Internship" in parts or INTERN_RE.search(title)
+        if not (intern and is_design_role(title)):
+            continue
+        loc = re.sub(r"\s*\((Onsite|Hybrid|Remote)\)|\s*\+\d+$", "", parts[-1]).strip()
+        if "(Remote)" in parts[-1]:
+            loc += " / Remote"
+        out.append(job(company, title, unwrap_link(href), [loc], "Handshake", "Not stated"))
+    return out
+
+
+# Which parser handles alerts from which sender (matched anywhere in the email,
+# so alerts forwarded from another inbox work too).
+ALERT_PARSERS = {"joinhandshake.com": parse_handshake}
+
+
+def from_email_alerts():
+    """Read recent job-alert emails from the inbox (read-only; nothing is changed)."""
+    import email
+    import email.policy
+    import imaplib
+    user = os.environ.get("ALERTS_EMAIL") or os.environ.get("GMAIL_ADDRESS")
+    password = os.environ.get("ALERTS_APP_PASSWORD") or os.environ.get("GMAIL_APP_PASSWORD")
+    if not (user and password):
+        return []
+    out = []
+    with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
+        imap.login(user, password)
+        imap.select('"[Gmail]/All Mail"', readonly=True)
+        senders = " OR ".join(f'"{d}"' for d in ALERT_PARSERS)
+        _, ids = imap.search(None, "X-GM-RAW", f'"newer_than:3d ({senders})"')
+        for msg_id in ids[0].split():
+            _, data = imap.fetch(msg_id, "(RFC822)")
+            msg = email.message_from_bytes(data[0][1], policy=email.policy.default)
+            part = msg.get_body(preferencelist=("html",))
+            if part is None:
+                continue
+            body = part.get_content()
+            for domain, parser in ALERT_PARSERS.items():
+                if domain in body or domain in str(msg["From"]):
+                    out.extend(parser(body))
+    return out
+
+
 def from_simplify():
     mapping = {
         "Offers Sponsorship": "Sponsors",
@@ -904,6 +965,7 @@ def collect():
         ("kpmg-us", from_kpmg_us), ("fred-hutch", from_fred_hutch),
         ("sound-transit", from_sound_transit), ("allen-institute", from_allen_institute),
         ("accenture", from_accenture), ("mckinsey", from_mckinsey),
+        ("email alerts", from_email_alerts),
     ]]
     tasks += [(f"successfactors:{s['company']}", from_successfactors, s)
               for s in config.SUCCESSFACTORS]
