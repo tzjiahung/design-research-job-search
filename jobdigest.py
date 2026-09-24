@@ -94,7 +94,7 @@ def fetch(url, body=None, ua=BROWSER_UA, headers=None):
             with urllib.request.urlopen(req, timeout=60) as resp:
                 return resp.read()
         except urllib.error.HTTPError as exc:
-            if exc.code not in (429, 502, 503) or attempt == 3:
+            if exc.code not in (429, 500, 502, 503, 504) or attempt == 3:
                 raise
             time.sleep(5 * 2 ** attempt)  # the site asked us to slow down
         except (urllib.error.URLError, ConnectionError, TimeoutError):
