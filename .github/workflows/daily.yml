@@ -1,0 +1,29 @@
+name: Daily design internship digest
+
+on:
+  schedule:
+    - cron: "0 13 * * *"  # 13:00 UTC = 9am New York / 9pm Singapore & Hong Kong
+  workflow_dispatch:      # "Run workflow" button for testing
+
+permissions:
+  contents: write         # lets the job save seen.json back to the repo
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python jobdigest.py
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+      - name: Remember what was sent
+        run: |
+          git config user.name "job-digest-bot"
+          git config user.email "job-digest-bot@users.noreply.github.com"
+          git add seen.json
+          git diff --cached --quiet || git commit -m "Update seen jobs" && git push
