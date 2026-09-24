@@ -67,7 +67,7 @@ GREENHOUSE = [
     "toast", "peloton", "ideo", "sonyinteractiveentertainmentglobal", "xai", "medium",
     "coursera", "pitchbookdata", "samsungresearchamerica", "samsungsemiconductor",
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
-    "thealleninstitute",
+    "thealleninstitute", "stackadapt",
 ]
 LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning"]
 ASHBY = [
@@ -135,6 +135,8 @@ JIBE = [
 ]
 PHENOM = [
     {"company": "Honda", "base": "https://careers.honda.com"},
+    {"company": "Activision", "base": "https://careers.activision.com"},
+    {"company": "Blizzard", "base": "https://careers.blizzard.com"},
     {"company": "BCG", "base": "https://careers.bcg.com", "lang": "en_global",
      "country": "global", "path": "global/en", "id_field": "jobSeqNo"},
 ]
