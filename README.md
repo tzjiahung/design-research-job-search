@@ -1,7 +1,7 @@
 # Design internship digest
 
 One email a day with every new UX / product design / UX research internship in the
-US, Singapore, Hong Kong, London and Beijing. Each job appears once, even when several
+US, Singapore, Hong Kong, London and Taiwan. Each job appears once, even when several
 boards list it.
 
 **Sources**, all read straight from the employer's own careers site:

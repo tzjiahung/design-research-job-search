@@ -15,8 +15,10 @@ ROLE_PATTERNS = [
     r"design research",
     r"experience research",
     r"(brand|service|web|communication|creative) design",
-    # Chinese titles (ByteDance Beijing): interaction/UX/visual/product design, user research
-    r"交互设计", r"用户体验", r"视觉设计", r"产品设计", r"用户研究", r"体验设计",
+    r"\(design\)",  # e.g. KPMG's "Digital Village (Design)"
+    # Chinese titles (Taiwan / Hong Kong): UX, UI, interaction, visual, product design, user research
+    r"使用者經驗", r"使用者體驗", r"使用者研究", r"介面設計", r"互動設計", r"視覺設計",
+    r"產品設計", r"體驗設計", r"用戶體驗", r"用户体验", r"交互设计", r"产品设计", r"用户研究",
 ]
 
 # ...and must NOT match any of these (filters out chip design, "UX Engineer", etc.).
@@ -42,14 +44,14 @@ EXCLUDE_PATTERNS = [
 INTERN_PATTERNS = [
     r"\bintern(ship)?s?\b", r"co-?op\b", r"\bplacement\b", r"\bsummer 20\d\d\b",
     r"summer (analyst|associate)",  # how banks like JPMorgan name internships
-    r"实习",  # "intern" in Chinese
+    r"实习", r"實習",  # "intern" in Chinese
 ]
 
-# Extra search words for ByteDance's China site, whose titles are in Chinese.
-CHINESE_TERMS = ["设计实习生", "用户研究实习生", "交互设计", "用户体验"]
+# Search words for the Taiwan sites, whose titles are in Chinese.
+TAIWAN_TERMS = ["設計", "實習", "UX", "UI", "使用者"]
 
 # Which regions to keep. Remote roles are kept when they aren't tied to another country.
-REGIONS = ["US", "Singapore", "Hong Kong", "London", "Beijing"]
+REGIONS = ["US", "Singapore", "Hong Kong", "London", "Taiwan"]
 
 # Companies whose job boards are read directly. Add more any time:
 # find the company's careers page; if links go to boards.greenhouse.io/<slug>,
@@ -65,6 +67,7 @@ GREENHOUSE = [
     "toast", "peloton", "ideo", "sonyinteractiveentertainmentglobal", "xai", "medium",
     "coursera", "pitchbookdata", "samsungresearchamerica", "samsungsemiconductor",
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
+    "thealleninstitute",
 ]
 LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning"]
 ASHBY = [
@@ -105,6 +108,14 @@ WORKDAY = [
      "site": "Belkin_Careers"},
     {"company": "Foxconn Interconnect", "host": "belkin.wd5.myworkdayjobs.com",
      "tenant": "belkin", "site": "FIT_Careers"},
+    {"company": "PwC", "host": "pwc.wd3.myworkdayjobs.com", "tenant": "pwc",
+     "site": "US_Entry_Level_Careers"},
+    {"company": "PwC", "host": "pwc.wd3.myworkdayjobs.com", "tenant": "pwc",
+     "site": "Global_Campus_Careers"},
+    {"company": "PATH", "host": "path.wd1.myworkdayjobs.com", "tenant": "path",
+     "site": "External"},
+    {"company": "Seattle Children's", "host": "seattlechildrens.wd5.myworkdayjobs.com",
+     "tenant": "seattlechildrens", "site": "External"},
     {"company": "Expedia", "host": "expedia.wd108.myworkdayjobs.com", "tenant": "expedia",
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
@@ -124,6 +135,31 @@ JIBE = [
 ]
 PHENOM = [
     {"company": "Honda", "base": "https://careers.honda.com"},
+    {"company": "BCG", "base": "https://careers.bcg.com", "lang": "en_global",
+     "country": "global", "path": "global/en", "id_field": "jobSeqNo"},
+]
+SUCCESSFACTORS = [
+    {"company": "TSMC", "search": "https://ro.careers.tsmc.com/search/"},
+    {"company": "KPMG", "search": "https://careers.kpmg.com.sg/search/", "location": "Singapore"},
+    {"company": "Deloitte", "search": "https://jobs.sea.deloitte.com/search/"},
+    {"company": "EY", "search": "https://careers.ey.com/ey/search/",
+     "locations": ["United States", "Singapore", "Hong Kong", "London"]},
+]
+NEOGOV = [
+    {"company": "City of Seattle", "agency": "seattle", "location": "Seattle, WA"},
+    {"company": "City of Bellevue", "agency": "bellevuewa", "location": "Bellevue, WA"},
+]
+# Foxconn group Taiwan sites.
+ISITE = [
+    {"company": "Foxconn (Hon Hai)", "api": "https://recruit.foxconn.com/hh_recruit_tw_api/portal_api",
+     "web": "https://recruit.foxconn.com/isite-web-tw"},
+    {"company": "Foxconn Interconnect", "api": "https://recruit.one-fit.com/recruit-api/portal_api",
+     "web": "https://recruit.one-fit.com/isite-web-tw"},
+]
+# Moka sites (Hong Kong / China). "all_intern" = the whole site is internships/graduates.
+MOKA = [
+    {"company": "PwC", "org": "pwc", "site": 148260, "location": "Hong Kong", "all_intern": True},
+    {"company": "KPMG", "org": "kpmg", "site": 74217, "location": "Hong Kong", "all_intern": True},
 ]
 
 # SimplifyJobs' community-maintained internship list (mostly tech, US/Canada).

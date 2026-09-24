@@ -50,14 +50,15 @@ REGION_RES = {
     "Singapore": re.compile(r"singapore|\bsg\b", re.I),
     "Hong Kong": re.compile(r"hong kong|\bhk\b", re.I),
     "London": re.compile(r"london", re.I),
-    "Beijing": re.compile(r"beijing|北京", re.I),
+    "Taiwan": re.compile(r"taiwan|taipei|hsinchu|taichung|taoyuan|kaohsiung|台灣|臺灣|台北|臺北|"
+                         r"新竹|台中|臺中|桃園|高雄|新北", re.I),
 }
 REGION_ORDER = list(REGION_RES) + ["Remote"]
 # Anything that names a country outside our regions means "not for us", even if remote.
 FOREIGN_RE = re.compile(
     r"canada|toronto|vancouver|\buk\b|united kingdom|ireland|dublin|germany|berlin|"
     r"france|paris|india|bangalore|bengaluru|japan|tokyo|australia|sydney|brazil|mexico|"
-    r"netherlands|amsterdam|spain|poland|china|shanghai|korea|seoul|taiwan|israel",
+    r"netherlands|amsterdam|spain|poland|china|beijing|shanghai|korea|seoul|israel",
     re.I,
 )
 
@@ -282,7 +283,8 @@ def from_oracle(site):
 def from_phenom(site):
     found = {}
     for term in SEARCH_TERMS:
-        body = {"lang": "en_us", "deviceType": "desktop", "country": site.get("country", "us"),
+        body = {"lang": site.get("lang", "en_us"), "deviceType": "desktop",
+                "country": site.get("country", "us"),
                 "pageName": "search-results", "ddoKey": "refineSearch", "sortBy": "",
                 "subsearch": "", "from": 0, "jobs": True, "counts": True, "all_fields": [],
                 "size": 50, "clearAll": False, "jdsource": "facets", "isSliderEnable": False,
@@ -291,7 +293,7 @@ def from_phenom(site):
         data = fetch_json(f"{site['base']}/widgets", body)
         for j in data.get("refineSearch", {}).get("data", {}).get("jobs", []):
             if is_design_internship(j.get("title", "")):
-                found[j["jobId"]] = j
+                found[j.get(site.get("id_field", "jobId"))] = j
     return [
         job(site["company"], j["title"], f"{site['base']}/{site.get('path', 'us/en')}/job/{jid}",
             j.get("multi_location") or [j.get("location", "")], "Phenom",
@@ -449,13 +451,13 @@ def from_meta():
 
 
 def from_bytedance():
-    """ByteDance's own site: global (en) and China campus (in Chinese)."""
+    """ByteDance's own global careers site."""
     opener = session()
     post_json(opener, "https://jobs.bytedance.com/api/v1/csrf/token", {"portal_entrance": 1}, {})
     jar = next(h.cookiejar for h in opener.handlers
                if isinstance(h, urllib.request.HTTPCookieProcessor))
     token = next(urllib.parse.unquote(c.value) for c in jar if c.name == "atsx-csrf-token")
-    searches = [("en", t) for t in SEARCH_TERMS] + [("campus", t) for t in config.CHINESE_TERMS]
+    searches = [("en", t) for t in SEARCH_TERMS]
     found = {}
     for path, term in searches:
         data = post_json(opener, "https://jobs.bytedance.com/api/v1/search/job/posts", {
@@ -579,7 +581,7 @@ def from_walmart():
                 "from": 0, "size": 50}}})
         for j in data["data"]["jobSearch"]["searchResults"]:
             if is_design_internship(j.get("jobTitle", "")):
-                found[j["jobId"]] = j
+                found[j.get(site.get("id_field", "jobId"))] = j
     return [job("Walmart", j["jobTitle"], f"https://careers.walmart.com/us/en/jobs/{jid}",
                 [l.get("storeName", "") for l in j.get("location") or []] or ["United States"],
                 "Walmart", "Not stated")
@@ -601,24 +603,218 @@ def from_foxconn():
     return out
 
 
-def from_tsmc():
-    """TSMC's overseas careers site (Arizona, San Jose, ...). HTML only."""
-    out = []
+def from_successfactors(site):
+    """SAP SuccessFactors career sites (TSMC overseas, KPMG Singapore, Deloitte SEA, EY). HTML."""
+    base = re.match(r"https://[^/]+", site["search"]).group(0)
+    out = {}
     for term in SEARCH_TERMS:
-        page = fetch("https://ro.careers.tsmc.com/search/?"
-                     + urllib.parse.urlencode({"q": term, "startrow": 0})).decode("utf-8", "replace")
-        for row in re.findall(r'<tr class="data-row".*?</tr>', page, re.S):
-            link = re.search(r'class="jobTitle-link"[^>]*href="([^"]+)"[^>]*>(.*?)</a>', row, re.S)
-            if not link:
+        for where in site.get("locations", [None]):
+            params = {"q": term, "startrow": 0}
+            if where:
+                params["locationsearch"] = where
+            page = fetch(site["search"] + "?" + urllib.parse.urlencode(params),
+                         headers={"Accept": "text/html"}).decode("utf-8", "replace")
+            for row in re.findall(r'<tr class="data-row".*?</tr>', page, re.S):
+                link = re.search(r'class="jobTitle-link"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+                                 row, re.S)
+                if not link:
+                    continue
+                title = html.unescape(strip_html(link.group(2))).strip()
+                if not is_design_internship(title):
+                    continue
+                loc = re.search(r'class="jobLocation"[^>]*>(.*?)</span>', row, re.S)
+                loc = html.unescape(strip_html(loc.group(1))).strip() if loc else ""
+                out[link.group(1)] = job(site["company"], title, base + link.group(1),
+                                         [loc or site.get("location") or where or ""],
+                                         site["company"], "Not stated")
+    return list(out.values())
+
+
+def html_rows(url, row_re, headers=None):
+    return re.findall(row_re, fetch(url, headers={"Accept": "text/html", **(headers or {})})
+                      .decode("utf-8", "replace"), re.S)
+
+
+def text_of(fragment):
+    return re.sub(r"\s+", " ", html.unescape(strip_html(fragment))).strip()
+
+
+def from_deloitte_us():
+    out = {}
+    for term in SEARCH_TERMS:
+        url = ("https://apply.deloitte.com/en_US/careers/SearchJobs/"
+               f"{urllib.parse.quote(term)}?listFilterMode=1&jobRecordsPerPage=50&sort=relevancy")
+        for row in html_rows(url, r'<article class="article--result.*?</article>'):
+            link = re.search(r'<h3[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>', row, re.S)
+            if not link or not is_design_internship(text_of(link.group(2))):
                 continue
-            title = html.unescape(strip_html(link.group(2))).strip()
+            # Subtitle reads "Deloitte US | Deloitte Tax LLP | <location>".
+            sub = re.search(r'article__header__text__subtitle[^>]*>(.*?)</div>', row, re.S)
+            spans = re.findall(r"<span[^>]*>(.*?)</span>", sub.group(1), re.S) if sub else []
+            loc = text_of(spans[-1]) if spans else ""
+            if loc.lower() in ("", "multiple locations"):
+                loc += ", United States"
+            out[link.group(1)] = job("Deloitte", text_of(link.group(2)), link.group(1),
+                                     [loc], "Deloitte", "Not stated")
+    return list(out.values())
+
+
+def from_kpmg_us():
+    out = {}
+    for term in SEARCH_TERMS:
+        url = "https://www.kpmguscareers.com/job-search/?" + urllib.parse.urlencode({"keyword": term})
+        for href, inner in html_rows(url, r'<a[^>]*href="(/jobdetail/\?jobId=[^"]+)"[^>]*>(.*?)</a>'):
+            title_m = re.search(r'class="[^"]*h4[^"]*"[^>]*>(.*?)<', inner, re.S)
+            title = text_of(title_m.group(1) if title_m else inner)
             if not is_design_internship(title):
                 continue
-            loc = re.search(r'class="jobLocation"[^>]*>(.*?)</span>', row, re.S)
-            out.append(job("TSMC", title, "https://ro.careers.tsmc.com" + link.group(1),
-                           [strip_html(loc.group(1)).strip() if loc else ""], "TSMC",
+            # Titles look like "Tax Intern | Tampa Winter 2027".
+            city = title.split("|", 1)[1] if "|" in title else ""
+            out[href] = job("KPMG", title, "https://www.kpmguscareers.com" + html.unescape(href),
+                            [re.sub(r"(Summer|Winter|Fall|Spring)?\s*20\d\d", "", city).strip()
+                             + ", United States"], "KPMG", "Not stated")
+    return list(out.values())
+
+
+def from_fred_hutch():
+    out = []
+    url = ("https://careers-fhcrc.icims.com/jobs/search?ss=1&in_iframe=1&"
+           + urllib.parse.urlencode({"searchKeyword": "intern"}))
+    for card in html_rows(url, r'<li class="[^"]*iCIMS_JobCardItem.*?</li>'):
+        link = re.search(r'<a href="([^"]+)" class="iCIMS_Anchor".*?<h3[^>]*>(.*?)</h3>', card, re.S)
+        if link and is_design_internship(text_of(link.group(2))):
+            loc = re.search(r'Location.*?<dd[^>]*>(.*?)</dd>', card, re.S)
+            out.append(job("Fred Hutch", text_of(link.group(2)), html.unescape(link.group(1)),
+                           [text_of(loc.group(1)) if loc else "Seattle, WA"], "Fred Hutch",
                            "Not stated"))
     return out
+
+
+def from_neogov(site):
+    """City governments on governmentjobs.com: one XML feed of every open job."""
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(fetch(
+        f"https://www.governmentjobs.com/SearchEngine/JobsFeed?agency={site['agency']}",
+        headers={"Accept": "application/xml"}))
+    out = []
+    for item in root.iter("item"):
+        title = item.findtext("title") or ""
+        if not is_design_internship(title):
+            continue
+        loc = next((el.text for el in item if el.tag.endswith("location")), "") or site["location"]
+        posted = None
+        try:
+            posted = datetime.datetime.strptime(item.findtext("pubDate")[:16],
+                                                "%a, %d %b %Y").date().isoformat()
+        except (TypeError, ValueError):
+            pass
+        out.append(job(site["company"], title, item.findtext("link"), [loc], "NEOGOV",
+                       "Not stated", posted))
+    return out
+
+
+def from_sound_transit():
+    base = ("https://recruiting.ultipro.com/SOU1036SOUND/JobBoard/"
+            "dcc5dbea-875e-4cd1-bfd2-8e046cecc54f")
+    found = {}
+    for term in SEARCH_TERMS:
+        data = fetch_json(f"{base}/JobBoardView/LoadSearchResults", {
+            "opportunitySearch": {"Top": 50, "Skip": 0, "QueryString": term, "Filters": [],
+                                  "OrderBy": [{"Value": "postedDateDesc", "PropertyName":
+                                               "PostedDate", "Ascending": False}]},
+            "matchCriteria": {"PreferredJobs": [], "Educations": [],
+                              "LicenseAndCertifications": [], "Skills": [],
+                              "hasNoLicenses": False, "SkippedSkills": []}})
+        for o in data.get("opportunities", []):
+            if is_design_internship(o.get("Title", "")):
+                found[o["Id"]] = o
+    return [job("Sound Transit", o["Title"], f"{base}/OpportunityDetail?opportunityId={oid}",
+                [", ".join(x for x in ((l.get("Address") or {}).get("City"),
+                                       ((l.get("Address") or {}).get("State") or {}).get("Code"))
+                           if x) for l in o.get("Locations") or []] or ["Seattle, WA"],
+                "Sound Transit", "Not stated", (o.get("PostedDate") or "")[:10] or None)
+            for oid, o in found.items()]
+
+
+def from_allen_institute():
+    data = fetch_json("https://careers-api.clearcompany.com/v1/f724f829-c8a2-8b32-a83b-2a479b88b77f")
+    return [job("Allen Institute", j["positionTitle"], j.get("applyLink"),
+                [j.get("location") or "Seattle, WA"], "Allen Institute", "Not stated",
+                (j.get("postedDate") or "")[:10] or None)
+            for j in data.get("results", []) if is_design_internship(j.get("positionTitle", ""))]
+
+
+def from_accenture():
+    out = {}
+    countries = [("USA", "us-en"), ("Singapore", "sg-en"), ("Hong Kong", "hk-en"),
+                 ("United Kingdom", "gb-en")]
+    for term in SEARCH_TERMS:
+        for country, site in countries:
+            fields = {"startIndex": "0", "maxResultSize": "50", "jobKeyword": term,
+                      "jobCountry": country, "jobLanguage": "en", "countrySite": site,
+                      "sortBy": "0", "searchType": "vectorSearch", "totalHits": "true",
+                      "jobFilters": "[]"}
+            boundary = "----jobdigest"
+            body = "".join(f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"'
+                           f"\r\n\r\n{v}\r\n" for k, v in fields.items())
+            body += f"--{boundary}--\r\n"
+            req = urllib.request.Request(
+                "https://www.accenture.com/api/accenture/elastic/findjobs",
+                data=body.encode(), headers={
+                    "User-Agent": BROWSER_UA, "Accept": "application/json",
+                    "Content-Type": f"multipart/form-data; boundary={boundary}"})
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.load(resp)
+            for j in data.get("data", []):
+                if is_design_internship(j.get("title", "")):
+                    out[j.get("jobDetailUrl")] = job(
+                        "Accenture", j["title"], (j.get("jobDetailUrl") or "").replace("{0}", site),
+                        j.get("location") or [country], "Accenture", "Not stated",
+                        (j.get("updateDate") or "")[:10] or None)
+    return list(out.values())
+
+
+def from_mckinsey():
+    found = {}
+    for term in SEARCH_TERMS:
+        data = fetch_json("https://gateway.mckinsey.com/apigw-x0cceuow60/v1/api/jobs/search?"
+                          + urllib.parse.urlencode({"pageSize": 50, "start": 1, "lang": "en",
+                                                    "q": term}))
+        for j in data.get("docs") or []:
+            if is_design_internship(j.get("title", "")):
+                found[j["friendlyURL"]] = j
+    return [job("McKinsey", j["title"],
+                f"https://www.mckinsey.com/careers/search-jobs/jobs/{slug}",
+                (j.get("cities") or []) + (j.get("countries") or []), "McKinsey", "Not stated")
+            for slug, j in found.items()]
+
+
+def from_moka(site):
+    """Moka job sites (PwC Hong Kong, KPMG China/HK). Replies are AES-encrypted."""
+    import base64
+    import subprocess
+    out = {}
+    for term in SEARCH_TERMS + ["实习", "intern"]:
+        reply = fetch_json("https://app.mokahr.com/api/outer/ats-apply/website/jobs/v2",
+                           {"orgId": site["org"], "siteId": site["site"], "limit": 50,
+                            "offset": 0, "keyword": term})
+        key = reply["necromancer"].encode().hex()
+        plain = subprocess.run(
+            ["openssl", "enc", "-d", "-aes-128-cbc", "-K", key, "-iv", key, "-a", "-A"],
+            input=reply["data"].encode(), capture_output=True, check=True).stdout
+        # The first block decrypts to junk; the JSON is intact from "data": onward.
+        text = plain[16:].decode("utf-8", "replace")
+        jobs = json.loads("{" + text[text.find('"data":'):])["data"].get("jobs", [])
+        for j in jobs:
+            title = j.get("title", "")
+            if is_design_role(title) and (INTERN_RE.search(title) or site.get("all_intern")):
+                locs = [l.get("address", "") for l in j.get("locations") or []]
+                out[j["id"]] = job(site["company"], title,
+                                   f"https://app.mokahr.com/campus-recruitment/{site['org']}/"
+                                   f"{site['site']}#/job/{j['id']}",
+                                   locs or [site["location"]], site["company"], "Not stated",
+                                   (j.get("openedAt") or "")[:10] or None)
+    return list(out.values())
 
 
 def from_atlassian():
@@ -657,6 +853,20 @@ def from_ycombinator():
             for j in found.values()]
 
 
+def from_isite(site):
+    """Foxconn group's Taiwan recruiting sites (Hon Hai, FIT). Titles are in Chinese."""
+    found = {}
+    for term in config.TAIWAN_TERMS:
+        for j in fetch_json(f"{site['api']}/JobVacancies?" + urllib.parse.urlencode({"keywords": term})):
+            title = j.get("job_name") or ""
+            intern = "INTERN" in (j.get("job_type") or "") or INTERN_RE.search(title)
+            if intern and is_design_role(title):
+                found[j["id"]] = j
+    return [job(site["company"], j["job_name"], f"{site['web']}/main/jobsearch/detail?id={jid}",
+                [j.get("loc_name") or "台灣"], site["company"], "Not stated")
+            for jid, j in found.items()]
+
+
 def from_simplify():
     mapping = {
         "Offers Sponsorship": "Sponsors",
@@ -690,8 +900,16 @@ def collect():
         ("apple", from_apple), ("meta", from_meta), ("bytedance", from_bytedance),
         ("tiktok", from_tiktok), ("atlassian", from_atlassian), ("microsoft", from_microsoft),
         ("amazon", from_amazon), ("walmart", from_walmart), ("foxconn", from_foxconn),
-        ("tsmc", from_tsmc), ("ycombinator", from_ycombinator),
+        ("ycombinator", from_ycombinator), ("deloitte-us", from_deloitte_us),
+        ("kpmg-us", from_kpmg_us), ("fred-hutch", from_fred_hutch),
+        ("sound-transit", from_sound_transit), ("allen-institute", from_allen_institute),
+        ("accenture", from_accenture), ("mckinsey", from_mckinsey),
     ]]
+    tasks += [(f"successfactors:{s['company']}", from_successfactors, s)
+              for s in config.SUCCESSFACTORS]
+    tasks += [(f"neogov:{s['company']}", from_neogov, s) for s in config.NEOGOV]
+    tasks += [(f"moka:{s['company']}", from_moka, s) for s in config.MOKA]
+    tasks += [(f"isite:{s['company']}", from_isite, s) for s in config.ISITE]
     tasks += [(f"jibe:{s['company']}", from_jibe, s) for s in config.JIBE]
     tasks.append(("simplify", lambda _: from_simplify(), None))
 
