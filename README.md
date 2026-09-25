@@ -17,7 +17,7 @@ boards list it.
 Edit [config.py](config.py) to change roles, regions or companies. A company that can't
 be read on a given day is listed at the bottom of the email instead of breaking it.
 
-**How it works:** a GitHub Action runs [jobdigest.py](jobdigest.py) every day. The first
+**How it works:** a GitHub Action runs [jobdigest.py](jobdigest.py) at 11am and 11pm Seattle time. The first
 email lists everything open right now; after that you only get jobs you haven't seen.
 Jobs already sent are remembered in `seen.json`, which the Action updates on its own.
 

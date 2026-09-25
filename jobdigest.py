@@ -1127,7 +1127,7 @@ def render(new_jobs, total_open, first_run, errors):
         f"First digest: all {len(new_jobs)} design internships open right now. "
         "From tomorrow you'll only get new ones."
         if first_run
-        else f"{len(new_jobs)} new since yesterday · {total_open} open in total."
+        else f"{len(new_jobs)} new since the last email · {total_open} open in total."
     )
     rows_by_region = {}
     newest = lambda j: j["posted"] or max(j["received"].values(), default="")
