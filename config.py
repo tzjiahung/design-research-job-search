@@ -15,6 +15,9 @@ ROLE_PATTERNS = [
     r"design research",
     r"experience research",
     r"(brand|service|web|communication|creative) design",
+    r"\bui ?/?ux\b",  # "UIUX", "UI/UX"
+    r"design and research",
+    r"^design intern",
     r"\(design\)",  # e.g. KPMG's "Digital Village (Design)"
     # Chinese titles (Taiwan / Hong Kong): UX, UI, interaction, visual, product design, user research
     r"使用者經驗", r"使用者體驗", r"使用者研究", r"介面設計", r"互動設計", r"視覺設計",

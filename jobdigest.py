@@ -895,9 +895,34 @@ def parse_handshake(body):
     return out
 
 
+def parse_jobright(body):
+    """Jobright alerts (single-job and round-ups share one card layout)."""
+    out = []
+    for card in body.split('id="job-company-name"')[1:]:
+        company = re.search(r">\s*([^<]+?)\s*</p>", card)
+        link = re.search(r'id="job-title"[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>', card, re.S)
+        if not (company and link):
+            continue
+        title = text_of(link.group(2))
+        if not is_design_internship(title):
+            continue
+        # Tags hold location plus extras like "$25/hr - $30/hr" or "5+ referrals".
+        tags = [text_of(t) for t in re.findall(r'id="job-tag"[^>]*>(.*?)</p>', card, re.S)]
+        locs = [t for t in tags if not re.match(r"\$|\d+\+ referrals", t)]
+        job_id = re.search(r"jobright\.ai/jobs/info/([0-9a-f]+)", link.group(1))
+        url = (f"https://jobright.ai/jobs/info/{job_id.group(1)}" if job_id
+               else html.unescape(link.group(1)))
+        out.append(job(text_of(company.group(1)), title, url, locs, "Jobright", "Not stated"))
+    return out
+
+
 # Which parser handles alerts from which sender (matched anywhere in the email,
 # so alerts forwarded from another inbox work too).
-ALERT_PARSERS = {"joinhandshake.com": parse_handshake}
+ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobright}
+
+# How far back to read alert emails. The first run looks back further so the first
+# digest includes everything your alerts have already sent you.
+ALERT_LOOKBACK = "3d"
 
 
 def from_email_alerts():
@@ -912,9 +937,16 @@ def from_email_alerts():
     out = []
     with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
         imap.login(user, password)
-        imap.select('"[Gmail]/All Mail"', readonly=True)
+        # "All Mail" has a translated name in non-English Gmail; find it by its \All flag.
+        _, folders = imap.list()
+        all_mail = next((f.decode().rsplit(' "/" ', 1)[-1] for f in folders
+                         if "\\All" in f.decode()), "INBOX")
+        if not all_mail.startswith('"'):
+            all_mail = f'"{all_mail}"'
+        if imap.select(all_mail, readonly=True)[0] != "OK":
+            raise RuntimeError("couldn't open the mailbox")
         senders = " OR ".join(f'"{d}"' for d in ALERT_PARSERS)
-        _, ids = imap.search(None, "X-GM-RAW", f'"newer_than:3d ({senders})"')
+        _, ids = imap.search(None, "X-GM-RAW", f'"newer_than:{ALERT_LOOKBACK} ({senders})"')
         for msg_id in ids[0].split():
             _, data = imap.fetch(msg_id, "(RFC822)")
             msg = email.message_from_bytes(data[0][1], policy=email.policy.default)
@@ -1098,10 +1130,13 @@ def main():
                         help="write digest.html instead of emailing; don't update seen.json")
     args = parser.parse_args()
 
-    raw, errors = collect()
-    jobs = merge(raw)
+    global ALERT_LOOKBACK
     seen = json.loads(SEEN_FILE.read_text()) if SEEN_FILE.exists() else {}
     first_run = not seen
+    if first_run:
+        ALERT_LOOKBACK = "60d"  # include every alert already in the inbox
+    raw, errors = collect()
+    jobs = merge(raw)
     new_jobs = [j for j in jobs if j["key"] not in seen]
 
     body = render(new_jobs, len(jobs), first_run, errors)
