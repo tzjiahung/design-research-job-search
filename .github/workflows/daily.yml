@@ -2,7 +2,11 @@ name: Daily design internship digest
 
 on:
   schedule:
-    - cron: "0 13 * * *"  # 13:00 UTC = 9am New York / 9pm Singapore & Hong Kong
+    # 11am Seattle. GitHub schedules in UTC, and Seattle is UTC-7 in summer (PDT)
+    # and UTC-8 in winter (PST), so both times are scheduled and the check below
+    # skips whichever one doesn't match Seattle's clock today.
+    - cron: "0 18 * * *"
+    - cron: "0 19 * * *"
   workflow_dispatch:      # "Run workflow" button for testing
 
 permissions:
@@ -12,11 +16,25 @@ jobs:
   digest:
     runs-on: ubuntu-latest
     steps:
+      - name: Only run at 11am Seattle time
+        id: when
+        run: |
+          offset=$(TZ=America/Los_Angeles date +%z)
+          if [ "${{ github.event_name }}" != "schedule" ] \
+             || { [ "${{ github.event.schedule }}" = "0 18 * * *" ] && [ "$offset" = "-0700" ]; } \
+             || { [ "${{ github.event.schedule }}" = "0 19 * * *" ] && [ "$offset" = "-0800" ]; }; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Not 11am in Seattle for this schedule; skipping."
+          fi
       - uses: actions/checkout@v4
+        if: steps.when.outputs.go == 'true'
       - uses: actions/setup-python@v5
+        if: steps.when.outputs.go == 'true'
         with:
           python-version: "3.12"
       - run: python jobdigest.py
+        if: steps.when.outputs.go == 'true'
         env:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
@@ -24,6 +42,7 @@ jobs:
           ALERTS_EMAIL: ${{ secrets.ALERTS_EMAIL }}
           ALERTS_APP_PASSWORD: ${{ secrets.ALERTS_APP_PASSWORD }}
       - name: Remember what was sent
+        if: steps.when.outputs.go == 'true'
         run: |
           git config user.name "job-digest-bot"
           git config user.email "job-digest-bot@users.noreply.github.com"
