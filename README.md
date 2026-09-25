@@ -12,7 +12,7 @@ boards list it.
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
   Foxconn, DocuSign, GitHub, MathWorks, ...
 - The SimplifyJobs internship list and Y Combinator startups
-- Job-alert emails in your inbox (Handshake so far), read without changing anything
+- Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs), read without changing anything
 
 Edit [config.py](config.py) to change roles, regions or companies. A company that can't
 be read on a given day is listed at the bottom of the email instead of breaking it.

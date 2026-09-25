@@ -877,12 +877,12 @@ def unwrap_link(url):
 
 
 def parse_handshake(body):
-    """Handshake job round-ups: each card is <a><span>company</span><span>title</span>
-    <span>"$20–30/hr • Internship • Vienna, VA (Hybrid)"</span></a>."""
+    """Handshake round-ups and single-job notifications share one card shape:
+    <a><span>company</span><span>title</span><span>meta</span></a>, where meta reads like "$20–30/hr • Internship • Vienna, VA (Hybrid)"."""
+    cards = re.findall(r'<a[^>]*href="([^"]+)"[^>]*>\s*<span[^>]*>([^<]*)</span>\s*'
+                       r'<span[^>]*>([^<]*)</span>\s*<span[^>]*>([^<]*)</span>\s*</a>', body)
     out = []
-    card = re.compile(r'<a[^>]*href="([^"]+)"[^>]*>\s*<span[^>]*>([^<]*)</span>\s*'
-                      r'<span[^>]*>([^<]*)</span>\s*<span[^>]*>([^<]*)</span>\s*</a>')
-    for href, company, title, meta in card.findall(body):
+    for href, company, title, meta in cards:
         company, title, meta = text_of(company), text_of(title), text_of(meta)
         parts = [p.strip() for p in meta.split("•")]
         intern = "Internship" in parts or INTERN_RE.search(title)
@@ -892,6 +892,24 @@ def parse_handshake(body):
         if "(Remote)" in parts[-1]:
             loc += " / Remote"
         out.append(job(company, title, unwrap_link(href), [loc], "Handshake", "Not stated"))
+    return out
+
+
+def parse_trueup(body):
+    """Lenny's Jobs (TrueUp) weekly and daily alerts. Each card: title linking to the
+    company's own job page, then the company, then an uppercase location line."""
+    out = []
+    for card in body.split("font-weight:600;font-size:16px;margin-bottom:6px;")[1:]:
+        link = re.search(r'<a href="([^"]+)"[^>]*>(.*?)</a>', card, re.S)
+        company = re.search(r'<a href="https://www\.trueup\.io/co/[^"]*"[^>]*>(.*?)</a>', card, re.S)
+        loc = re.search(r'color:#737373;margin-bottom:10px;">(.*?)</div>', card, re.S)
+        if not (link and company):
+            continue
+        title = text_of(link.group(2))
+        if not is_design_internship(title):
+            continue
+        out.append(job(text_of(company.group(1)), title, html.unescape(link.group(1)),
+                       [text_of(loc.group(1)) if loc else ""], "Lenny's Jobs", "Not stated"))
     return out
 
 
@@ -918,7 +936,8 @@ def parse_jobright(body):
 
 # Which parser handles alerts from which sender (matched anywhere in the email,
 # so alerts forwarded from another inbox work too).
-ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobright}
+ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobright,
+                 "trueup.io": parse_trueup}
 
 # How far back to read alert emails. The first run looks back further so the first
 # digest includes everything your alerts have already sent you.
@@ -954,9 +973,12 @@ def from_email_alerts():
             if part is None:
                 continue
             body = part.get_content()
-            for domain, parser in ALERT_PARSERS.items():
-                if domain in body or domain in str(msg["From"]):
-                    out.extend(parser(body))
+            sender = str(msg["From"])
+            # Match on the sender first; only fall back to the body for forwarded alerts.
+            matches = [p for d, p in ALERT_PARSERS.items() if d in sender] or [
+                p for d, p in ALERT_PARSERS.items() if d in body]
+            for parser in matches[:1]:
+                out.extend(parser(body))
     return out
 
 
