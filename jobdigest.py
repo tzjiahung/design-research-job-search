@@ -964,7 +964,7 @@ def from_email_alerts():
             all_mail = f'"{all_mail}"'
         if imap.select(all_mail, readonly=True)[0] != "OK":
             raise RuntimeError("couldn't open the mailbox")
-        senders = " OR ".join(f'"{d}"' for d in ALERT_PARSERS)
+        senders = " OR ".join(ALERT_PARSERS)  # no inner quotes: IMAP can't nest them
         _, ids = imap.search(None, "X-GM-RAW", f'"newer_than:{ALERT_LOOKBACK} ({senders})"')
         for msg_id in ids[0].split():
             _, data = imap.fetch(msg_id, "(RFC822)")
