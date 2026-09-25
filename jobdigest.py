@@ -18,6 +18,7 @@ import re
 import smtplib
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -944,6 +945,15 @@ ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobr
 ALERT_LOOKBACK = os.environ.get("ALERT_LOOKBACK") or "3d"
 
 
+def clean_lookback(value):
+    """Turn whatever was typed in the Run-workflow box into e.g. "60d". Handles
+    full-width characters from Chinese/Japanese keyboards (６０ｄ), stray quotes,
+    backticks and spaces; falls back to 3 days if it can't make sense of it."""
+    value = unicodedata.normalize("NFKC", value or "").strip().strip("`'\" ").lower()
+    m = re.fullmatch(r"(\d+)\s*(d|m|y|days?)?", value)
+    return f"{m.group(1)}{(m.group(2) or 'd')[0]}" if m else "3d"
+
+
 def from_email_alerts():
     """Read recent job-alert emails from the inbox (read-only; nothing is changed)."""
     import email
@@ -965,7 +975,11 @@ def from_email_alerts():
         if imap.select(all_mail, readonly=True)[0] != "OK":
             raise RuntimeError("couldn't open the mailbox")
         senders = " OR ".join(ALERT_PARSERS)  # no inner quotes: IMAP can't nest them
-        _, ids = imap.search(None, "X-GM-RAW", f'"newer_than:{ALERT_LOOKBACK} ({senders})"')
+        query = f"newer_than:{clean_lookback(ALERT_LOOKBACK)} ({senders})"
+        try:
+            _, ids = imap.search(None, "X-GM-RAW", f'"{query}"')
+        except imaplib.IMAP4.error as exc:
+            raise RuntimeError(f"{exc} (search was: {query!r})") from None
         for msg_id in ids[0].split():
             _, data = imap.fetch(msg_id, "(RFC822)")
             msg = email.message_from_bytes(data[0][1], policy=email.policy.default)
