@@ -1172,7 +1172,8 @@ def main():
         print("Wrote digest.html")
         return
 
-    if new_jobs or first_run:
+    # Scheduled runs stay quiet on empty days; manual runs always report back.
+    if new_jobs or first_run or os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
         send(subject, body)
     today = datetime.date.today().isoformat()
     for j in new_jobs:
