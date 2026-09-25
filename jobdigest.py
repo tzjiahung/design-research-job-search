@@ -958,6 +958,8 @@ def from_email_alerts():
     """Read recent job-alert emails from the inbox (read-only; nothing is changed)."""
     import email
     import email.policy
+    import email.utils
+    import zoneinfo
     import imaplib
     user = os.environ.get("ALERTS_EMAIL") or os.environ.get("GMAIL_ADDRESS")
     password = os.environ.get("ALERTS_APP_PASSWORD") or os.environ.get("GMAIL_APP_PASSWORD")
@@ -991,8 +993,13 @@ def from_email_alerts():
             # Match on the sender first; only fall back to the body for forwarded alerts.
             matches = [p for d, p in ALERT_PARSERS.items() if d in sender] or [
                 p for d, p in ALERT_PARSERS.items() if d in body]
+            # Alerts don't say when a job was posted, so remember when the email came.
+            received = email.utils.parsedate_to_datetime(msg["Date"]).astimezone(
+                zoneinfo.ZoneInfo("America/Los_Angeles")).date().isoformat()
             for parser in matches[:1]:
-                out.extend(parser(body))
+                for j in parser(body):
+                    j["received"] = received
+                    out.append(j)
     return out
 
 
@@ -1072,11 +1079,11 @@ def merge(jobs):
         if not regions:
             continue
         key = f"{norm(j['company'])}|{norm(j['title'])}"
-        if key not in merged:
-            merged[key] = dict(j, key=key, regions=regions, links={j["source"]: j["url"]})
-            continue
-        m = merged[key]
+        m = merged.setdefault(key, dict(j, key=key, regions=regions, links={}, received={}))
         m["links"].setdefault(j["source"], j["url"])
+        if j.get("received"):  # earliest alert email per source
+            prev = m["received"].get(j["source"])
+            m["received"][j["source"]] = min(prev, j["received"]) if prev else j["received"]
         m["locations"] = sorted(set(m["locations"]) | set(j["locations"]))
         m["regions"] = [r for r in REGION_ORDER if r in set(m["regions"]) | set(regions)]
         if m["sponsorship"] == "Not stated":
@@ -1095,6 +1102,25 @@ SPONSOR_STYLE = {
 }
 
 
+def short_date(iso):
+    try:
+        d = datetime.date.fromisoformat(iso[:10])
+    except ValueError:
+        return html.escape(iso)  # some site sent an odd date; show it as-is
+    return f"{d:%b} {d.day}"
+
+
+def when(j):
+    """ "posted Sep 18 · " from the job site, or "received via Jobright on Sep 18 · "
+    when the job only came from alert emails, which don't give a posting date."""
+    if j["posted"]:
+        return f"posted {short_date(j['posted'])} · "
+    if j.get("received"):
+        src, day = min(j["received"].items(), key=lambda kv: kv[1])
+        return f"received via {html.escape(src)} on {short_date(day)} · "
+    return ""
+
+
 def render(new_jobs, total_open, first_run, errors):
     today = datetime.date.today().strftime("%a %b %d, %Y")
     intro = (
@@ -1104,7 +1130,8 @@ def render(new_jobs, total_open, first_run, errors):
         else f"{len(new_jobs)} new since yesterday · {total_open} open in total."
     )
     rows_by_region = {}
-    for j in sorted(new_jobs, key=lambda j: (j["posted"] or "", j["company"]), reverse=True):
+    newest = lambda j: j["posted"] or max(j["received"].values(), default="")
+    for j in sorted(new_jobs, key=lambda j: (newest(j), j["company"]), reverse=True):
         rows_by_region.setdefault(j["regions"][0], []).append(j)
 
     parts = [
@@ -1134,7 +1161,7 @@ def render(new_jobs, total_open, first_run, errors):
                 f'<span style="font-size:12px;padding:1px 6px;border-radius:4px;'
                 f'{SPONSOR_STYLE[j["sponsorship"]]}">{j["sponsorship"]}</span> '
                 f'<span style="font-size:12px;color:#5f6368">'
-                f'{"posted " + j["posted"] + " · " if j["posted"] else ""}via {others}</span>'
+                f'{when(j)}via {others}</span>'
                 "</div>"
             )
     if not new_jobs:
