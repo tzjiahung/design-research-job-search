@@ -922,7 +922,7 @@ ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobr
 
 # How far back to read alert emails. The first run looks back further so the first
 # digest includes everything your alerts have already sent you.
-ALERT_LOOKBACK = "3d"
+ALERT_LOOKBACK = os.environ.get("ALERT_LOOKBACK") or "3d"
 
 
 def from_email_alerts():
@@ -933,7 +933,7 @@ def from_email_alerts():
     user = os.environ.get("ALERTS_EMAIL") or os.environ.get("GMAIL_ADDRESS")
     password = os.environ.get("ALERTS_APP_PASSWORD") or os.environ.get("GMAIL_APP_PASSWORD")
     if not (user and password):
-        return []
+        raise RuntimeError("no inbox login set (GMAIL_ADDRESS/ALERTS_EMAIL secrets)")
     out = []
     with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
         imap.login(user, password)
@@ -1133,7 +1133,7 @@ def main():
     global ALERT_LOOKBACK
     seen = json.loads(SEEN_FILE.read_text()) if SEEN_FILE.exists() else {}
     first_run = not seen
-    if first_run:
+    if first_run and not os.environ.get("ALERT_LOOKBACK"):
         ALERT_LOOKBACK = "60d"  # include every alert already in the inbox
     raw, errors = collect()
     jobs = merge(raw)

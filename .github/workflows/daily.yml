@@ -8,6 +8,11 @@ on:
     - cron: "0 18 * * *"
     - cron: "0 19 * * *"
   workflow_dispatch:      # "Run workflow" button for testing
+    inputs:
+      alert_lookback:
+        description: "How far back to read job-alert emails (e.g. 60d). Blank = 3d."
+        required: false
+        default: ""
 
 permissions:
   contents: write         # lets the job save seen.json back to the repo
@@ -41,6 +46,7 @@ jobs:
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
           ALERTS_EMAIL: ${{ secrets.ALERTS_EMAIL }}
           ALERTS_APP_PASSWORD: ${{ secrets.ALERTS_APP_PASSWORD }}
+          ALERT_LOOKBACK: ${{ github.event.inputs.alert_lookback }}
       - name: Remember what was sent
         if: steps.when.outputs.go == 'true'
         run: |
