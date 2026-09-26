@@ -1003,6 +1003,44 @@ def from_email_alerts():
     return out
 
 
+def from_interndock():
+    """Intern Dock's free Summer 2027 directory. The list is built into one of the site's
+    script files, whose name changes on every deploy, so find it through the main script."""
+    base = "https://www.interndock.com"
+    page = fetch(f"{base}/tracker/guides/summer-2027-internships-complete-directory",
+                 headers={"Accept": "text/html"}).decode("utf-8", "replace")
+    main_js = re.search(r'src="(/assets/index-[^"]+\.js)"', page)
+    if not main_js:
+        raise RuntimeError("page layout changed (no main script)")
+    main = fetch(base + main_js.group(1)).decode("utf-8", "replace")
+    guide_js = re.search(r'"\./(Summer2027ComprehensiveGuide-[^"]+\.js)"', main)
+    if not guide_js:
+        raise RuntimeError("page layout changed (no directory script)")
+    data = fetch(f"{base}/assets/{guide_js.group(1)}").decode("utf-8", "replace")
+
+    js_str = r'"((?:[^"\\]|\\.)*)"'
+    unquote = lambda x: json.loads(f'"{x}"')
+    # Company headings and job rows, in page order:
+    #   jsx("h3",{children:"Coinbase"})
+    #   jsxs("li",{children:["Product Design Intern — ",jsx("a",{href:"…"}),"— San Francisco…"]})
+    token = re.compile(r'\.jsxs?\("h3",\{children:' + js_str + r'\}\)'
+                       r'|\.jsxs?\("li",\{children:\[' + js_str + r',\w+\.jsx\("a",\{href:'
+                       + js_str + r'[^}]*\}\),' + js_str)
+    out, company = [], None
+    for m in token.finditer(data):
+        if m.group(1) is not None:
+            company = unquote(m.group(1))
+            continue
+        title = unquote(m.group(2)).rstrip(" —")
+        if company and is_design_role(title):  # the whole directory is internships
+            loc = unquote(m.group(4)).strip(" —")
+            out.append(job(company, title, unquote(m.group(3)), [loc], "Intern Dock",
+                           "Not stated"))
+    if not out and company is None:
+        raise RuntimeError("page layout changed (no listings found)")
+    return out
+
+
 def from_simplify():
     mapping = {
         "Offers Sponsorship": "Sponsors",
@@ -1040,7 +1078,7 @@ def collect():
         ("kpmg-us", from_kpmg_us), ("fred-hutch", from_fred_hutch),
         ("sound-transit", from_sound_transit), ("allen-institute", from_allen_institute),
         ("accenture", from_accenture), ("mckinsey", from_mckinsey),
-        ("email alerts", from_email_alerts),
+        ("email alerts", from_email_alerts), ("interndock", from_interndock),
     ]]
     tasks += [(f"successfactors:{s['company']}", from_successfactors, s)
               for s in config.SUCCESSFACTORS]
@@ -1078,7 +1116,8 @@ def merge(jobs):
         regions = regions_for(j["locations"])
         if not regions:
             continue
-        key = f"{norm(j['company'])}|{norm(j['title'])}"
+        company = norm(j["company"])
+        key = f"{config.COMPANY_ALIASES.get(company, company)}|{norm(j['title'])}"
         m = merged.setdefault(key, dict(j, key=key, regions=regions, links={}, received={}))
         m["links"].setdefault(j["source"], j["url"])
         if j.get("received"):  # earliest alert email per source

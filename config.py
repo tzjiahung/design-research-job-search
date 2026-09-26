@@ -41,6 +41,7 @@ EXCLUDE_PATTERNS = [
     r"digital design",
     r"mixed.signal",
     r"programmer",
+    r"civil", r"structural", r"\bwater\b", r"electrical",
 ]
 
 # A title must match one of these to count as an internship.
@@ -77,6 +78,12 @@ ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "thoughtworks", "Superhuman Platform Inc", "mobbin.com",
 ]
+# Studios/brands that repost the same job; treated as one company when de-duplicating.
+COMPANY_ALIASES = {
+    "activision blizzard": "activision", "raven software": "activision",
+    "treyarch": "activision", "blizzard": "activision", "doordash": "doordash usa",
+}
+
 # Display names for boards whose slug isn't the company name.
 NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mobbin"}
 SMARTRECRUITERS = ["wise", "servicenow"]
