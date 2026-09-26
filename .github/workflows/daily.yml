@@ -2,13 +2,13 @@ name: Daily design internship digest
 
 on:
   schedule:
-    # 11am and 11pm Seattle. GitHub schedules in UTC, and Seattle is UTC-7 in summer
+    # 11am and 9pm Seattle. GitHub schedules in UTC, and Seattle is UTC-7 in summer
     # (PDT) and UTC-8 in winter (PST), so each time is scheduled twice and the check
     # below skips whichever one doesn't match Seattle's clock today.
     - cron: "0 18 * * *"   # 11am PDT
     - cron: "0 19 * * *"   # 11am PST
-    - cron: "0 6 * * *"    # 11pm PDT
-    - cron: "0 7 * * *"    # 11pm PST
+    - cron: "0 4 * * *"    # 9pm PDT
+    - cron: "0 5 * * *"    # 9pm PST
   workflow_dispatch:      # "Run workflow" button for testing
     inputs:
       alert_lookback:
@@ -25,18 +25,18 @@ jobs:
   digest:
     runs-on: ubuntu-latest
     steps:
-      - name: Only run at 11am / 11pm Seattle time
+      - name: Only run at 11am / 9pm Seattle time
         id: when
         run: |
           offset=$(TZ=America/Los_Angeles date +%z)
           case "${{ github.event.schedule }}|$offset" in
-            "0 18 * * *|-0700"|"0 6 * * *|-0700"|"0 19 * * *|-0800"|"0 7 * * *|-0800") go=true ;;
+            "0 18 * * *|-0700"|"0 4 * * *|-0700"|"0 19 * * *|-0800"|"0 5 * * *|-0800") go=true ;;
             *) go=false ;;
           esac
           if [ "${{ github.event_name }}" != "schedule" ] || [ "$go" = true ]; then
             echo "go=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Not 11am/11pm in Seattle for this schedule; skipping."
+            echo "Not 11am/9pm in Seattle for this schedule; skipping."
           fi
       - uses: actions/checkout@v4
         if: steps.when.outputs.go == 'true'
