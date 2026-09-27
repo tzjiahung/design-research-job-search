@@ -1204,7 +1204,7 @@ def render(new_jobs, total_open, first_run, errors):
                 "</div>"
             )
     if not new_jobs:
-        parts.append("<p>Nothing new today.</p>")
+        parts.append("<p>No new design internships since the last email.</p>")
     if errors:
         parts.append(
             '<p style="margin-top:24px;font-size:12px;color:#999">Couldn\'t read: '
@@ -1242,7 +1242,8 @@ def main():
     new_jobs = [j for j in jobs if j["key"] not in seen]
 
     body = render(new_jobs, len(jobs), first_run, errors)
-    subject = f"🎨 {len(new_jobs)} {'open' if first_run else 'new'} design internships"
+    subject = (f"🎨 {len(new_jobs)} {'open' if first_run else 'new'} design internships"
+               if new_jobs else "🎨 No new design internships")
     print(f"{len(raw)} listings → {len(jobs)} unique · {len(new_jobs)} new · {len(errors)} errors")
     for e in errors:
         print("  error:", e, file=sys.stderr)
@@ -1252,9 +1253,7 @@ def main():
         print("Wrote digest.html")
         return
 
-    # Scheduled runs stay quiet on empty days; manual runs always report back.
-    if new_jobs or first_run or os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
-        send(subject, body)
+    send(subject, body)  # every run emails, even with nothing new
     today = datetime.date.today().isoformat()
     for j in new_jobs:
         seen[j["key"]] = today

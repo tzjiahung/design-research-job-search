@@ -2,13 +2,15 @@ name: Daily design internship digest
 
 on:
   schedule:
-    # 11am and 9pm Seattle. GitHub schedules in UTC, and Seattle is UTC-7 in summer
-    # (PDT) and UTC-8 in winter (PST), so each time is scheduled twice and the check
+    # Emails go out at 11am and 9pm Seattle time. GitHub often starts scheduled runs
+    # late, especially on the hour, so these start ~20 minutes early at an off-peak
+    # minute and the job waits until the exact time. Seattle is UTC-7 in summer (PDT)
+    # and UTC-8 in winter (PST), so each time is scheduled for both and the check
     # below skips whichever one doesn't match Seattle's clock today.
-    - cron: "0 18 * * *"   # 11am PDT
-    - cron: "0 19 * * *"   # 11am PST
-    - cron: "0 4 * * *"    # 9pm PDT
-    - cron: "0 5 * * *"    # 9pm PST
+    - cron: "37 17 * * *"   # 10:37am PDT -> 11am email
+    - cron: "37 18 * * *"   # 10:37am PST -> 11am email
+    - cron: "37 3 * * *"    # 8:37pm PDT  -> 9pm email
+    - cron: "37 4 * * *"    # 8:37pm PST  -> 9pm email
   workflow_dispatch:      # "Run workflow" button for testing
     inputs:
       alert_lookback:
@@ -25,19 +27,33 @@ jobs:
   digest:
     runs-on: ubuntu-latest
     steps:
-      - name: Only run at 11am / 9pm Seattle time
+      - name: Only run for 11am / 9pm Seattle time
         id: when
         run: |
           offset=$(TZ=America/Los_Angeles date +%z)
           case "${{ github.event.schedule }}|$offset" in
-            "0 18 * * *|-0700"|"0 4 * * *|-0700"|"0 19 * * *|-0800"|"0 5 * * *|-0800") go=true ;;
+            "37 17 * * *|-0700"|"37 3 * * *|-0700"|"37 18 * * *|-0800"|"37 4 * * *|-0800") go=true ;;
             *) go=false ;;
           esac
           if [ "${{ github.event_name }}" != "schedule" ] || [ "$go" = true ]; then
             echo "go=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Not 11am/9pm in Seattle for this schedule; skipping."
+            echo "Not the right schedule for Seattle's clock today; skipping."
           fi
+      - name: Wait until 11:00am / 9:00pm Seattle time
+        if: steps.when.outputs.go == 'true' && github.event_name == 'schedule'
+        run: |
+          # Collecting jobs takes ~1-2 minutes, so start about 90 seconds before the hour.
+          # If GitHub started us late, this doesn't wait at all and the email goes out now.
+          now=$(date +%s)
+          for hour in 11 21; do
+            target=$(TZ=America/Los_Angeles date -d "today $hour:00" +%s)
+            wait=$((target - now - 90))
+            if [ "$wait" -gt 0 ] && [ "$wait" -lt 3600 ]; then
+              echo "Waiting $wait seconds until $hour:00 Seattle time"
+              sleep "$wait"
+            fi
+          done
       - uses: actions/checkout@v4
         if: steps.when.outputs.go == 'true'
       - uses: actions/setup-python@v5
