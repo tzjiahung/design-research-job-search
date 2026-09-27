@@ -2,13 +2,15 @@ name: Daily design internship digest
 
 on:
   schedule:
-    # Emails go out at 11am and 9pm Seattle time. GitHub often starts scheduled runs
+    # Emails go out at 11am, 3pm and 9pm Seattle time. GitHub often starts scheduled runs
     # late, especially on the hour, so these start ~20 minutes early at an off-peak
     # minute and the job waits until the exact time. Seattle is UTC-7 in summer (PDT)
     # and UTC-8 in winter (PST), so each time is scheduled for both and the check
     # below skips whichever one doesn't match Seattle's clock today.
     - cron: "37 17 * * *"   # 10:37am PDT -> 11am email
     - cron: "37 18 * * *"   # 10:37am PST -> 11am email
+    - cron: "37 21 * * *"   # 2:37pm PDT  -> 3pm email
+    - cron: "37 22 * * *"   # 2:37pm PST  -> 3pm email
     - cron: "37 3 * * *"    # 8:37pm PDT  -> 9pm email
     - cron: "37 4 * * *"    # 8:37pm PST  -> 9pm email
   workflow_dispatch:      # "Run workflow" button for testing
@@ -27,12 +29,12 @@ jobs:
   digest:
     runs-on: ubuntu-latest
     steps:
-      - name: Only run for 11am / 9pm Seattle time
+      - name: Only run for 11am / 3pm / 9pm Seattle time
         id: when
         run: |
           offset=$(TZ=America/Los_Angeles date +%z)
           case "${{ github.event.schedule }}|$offset" in
-            "37 17 * * *|-0700"|"37 3 * * *|-0700"|"37 18 * * *|-0800"|"37 4 * * *|-0800") go=true ;;
+            "37 17 * * *|-0700"|"37 21 * * *|-0700"|"37 3 * * *|-0700"|"37 18 * * *|-0800"|"37 22 * * *|-0800"|"37 4 * * *|-0800") go=true ;;
             *) go=false ;;
           esac
           if [ "${{ github.event_name }}" != "schedule" ] || [ "$go" = true ]; then
@@ -40,13 +42,13 @@ jobs:
           else
             echo "Not the right schedule for Seattle's clock today; skipping."
           fi
-      - name: Wait until 11:00am / 9:00pm Seattle time
+      - name: Wait until 11:00am / 3:00pm / 9:00pm Seattle time
         if: steps.when.outputs.go == 'true' && github.event_name == 'schedule'
         run: |
           # Collecting jobs takes ~1-2 minutes, so start about 90 seconds before the hour.
           # If GitHub started us late, this doesn't wait at all and the email goes out now.
           now=$(date +%s)
-          for hour in 11 21; do
+          for hour in 11 15 21; do
             target=$(TZ=America/Los_Angeles date -d "today $hour:00" +%s)
             wait=$((target - now - 90))
             if [ "$wait" -gt 0 ] && [ "$wait" -lt 3600 ]; then

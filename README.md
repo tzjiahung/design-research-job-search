@@ -1,7 +1,7 @@
 # Design internship digest
 
-Two emails a day (11am and 9pm Seattle time) with every new UX / product design / UX
-research internship in the US, Singapore, Hong Kong, London and Taiwan. Each job appears
+Three emails a day (11am, 3pm and 9pm Seattle time) with every new UX / product design /
+UX research internship in the US, Singapore, Hong Kong, London and Taiwan. Each job appears
 once, even when several boards list it.
 
 **Sources:**
@@ -17,7 +17,7 @@ once, even when several boards list it.
 Edit [config.py](config.py) to change roles, regions or companies. A company that can't
 be read on a given day is listed at the bottom of the email instead of breaking it.
 
-**How it works:** a GitHub Action runs [jobdigest.py](jobdigest.py) at 11am and 9pm
+**How it works:** a GitHub Action runs [jobdigest.py](jobdigest.py) at 11am, 3pm and 9pm
 Seattle time. The first email listed everything open at the time; since then each email
 has only jobs you haven't been sent. If nothing is new, you still get a short "No new
 design internships" email. Jobs already sent are remembered in `seen.json`, which the
@@ -28,47 +28,64 @@ Action updates on its own.
 The goal is to see every new internship early enough to **apply within 24 hours of it
 being posted**.
 
-**When jobs go up.** Jobright's "just posted N minutes ago" alerts give a rough posting
-time for each job. Across the 68 such alerts received Sep 1–25, 2026 (Seattle time):
+**When companies actually post.** Greenhouse, Lever, Ashby and SmartRecruiters record the
+exact moment a job is published. Across 189 internships posted by 29 companies in the
+120 days before Sep 26, 2026, and counting a company's batch posted in the same hour once
+(106 posting events), Seattle time:
 
 ```
-12am-6am   0
-6am-9am   ####### 7
-9am-12pm  ########## 10
-12pm-3pm  ########### 11
-3pm-6pm   ############# 13
-6pm-9pm   ################## 18   ← busiest
-9pm-12am  ######### 9
+12am-6am  ###          7%
+6am-9am   #####       12%
+9am-12pm  ##########  24%
+12pm-3pm  ########### 28%   ← busiest
+3pm-6pm   ########    19%
+6pm-9pm   ##           3%
+9pm-12am  ##           3%
 ```
+Mon 27 · Tue 20 · Wed 17 · Thu 17 · Fri 23 · Sat 0 · Sun 2
 
-Postings were spread across every day of the week, weekends included. These are the
-times Jobright *noticed* each job, which can trail the real posting by up to an hour.
+Recruiters post during US business hours on weekdays: about 83% between 6am and 6pm
+Seattle (9am–9pm Eastern), and almost nothing in the evening or on weekends.
 
-**Why 11am and 9pm.**
-- **9pm** lands right after the busiest stretch (6–9pm), so the largest batch reaches you
-  the same evening.
-- **11am** picks up everything from the quiet overnight hours (nothing goes up between
-  midnight and 6am) plus the morning.
-- A job waits at most ~14 hours for the next email, and usually much less, which leaves
-  at least ~10 hours to apply inside the 24-hour window.
-- Jobs from company career sites are checked at the moment each email is built, so
-  they're as fresh as possible. Jobs from alert emails (Jobright, Lenny's Jobs,
-  Handshake) can lag by up to an hour. They show "received via Jobright on Sep 18"
-  instead of a posting date, because alerts don't include one.
+Jobright's alerts suggest otherwise: their "just posted" times peak at 6–9pm and include
+weekends. That peak is when Jobright finds jobs and sends alerts, often hours after the
+company posted, so the company data above is the one to plan around.
+
+**Why 11am, 3pm and 9pm.** How long a job waits for the next email, using the posting
+times above:
+
+| Emails (Seattle) | Typical wait | 90% of jobs within | Worst case |
+|---|---|---|---|
+| **11am + 3pm + 9pm (current)** | 2.8h | 6.0h | 13.6h |
+| 11am + 9pm | 5.2h | 9.1h | 13.6h |
+| 11am + 2pm + 6pm + 9pm | 2.0h | 5.7h | 13.6h |
+| 12pm + 6pm | 3.7h | 11.1h | 18.0h |
+
+- **11am** covers the overnight and early-morning postings.
+- **3pm** covers the busy 9am–3pm stretch the same afternoon. Adding it roughly halves the
+  typical wait.
+- **9pm** covers 3pm–6pm and the few evening postings, plus the day's alert emails.
+- **The worst case is ~14 hours** (a job posted just after 9pm waits for 11am), which
+  still leaves 10+ hours to apply within 24 hours. Putting all the emails in the daytime
+  would push the worst case to 18 hours.
+- **Freshness differs by source.** Jobs from company career sites are checked the moment
+  each email is built. Jobs from alert emails (Jobright, Lenny's Jobs, Handshake) arrive
+  later, often hours later. They show "received via Jobright on Sep 18" instead of a
+  posting date, because alerts don't include one.
 
 **Getting the email on time.** GitHub starts scheduled jobs late when it's busy,
 especially exactly on the hour (one 9pm run once started five hours late). So the
-schedule in [.github/workflows/daily.yml](.github/workflows/daily.yml) starts runs at
-10:37am and 8:37pm, a quieter minute, and the job waits until 11:00 or 9:00 before
-sending. Delays of up to ~20 minutes don't change when the email arrives. A longer
+schedule in [.github/workflows/daily.yml](.github/workflows/daily.yml) starts each run
+at :37, about 20 minutes early, which is a quieter minute. The job then waits until the
+exact hour before sending. Delays of up to ~20 minutes don't change when the email arrives. A longer
 delay makes the email late, but it still arrives.
 
 **Daylight saving.** GitHub schedules in UTC, and Seattle is UTC-7 in summer and UTC-8 in
 winter, so each time is scheduled at both UTC hours. A check at the start of the job
 skips whichever one doesn't match Seattle's clock that day.
 
-**Want it fresher?** A third email costs nothing. 8am, 2pm and 9pm would cap the wait at
-~11 hours. Add the matching cron lines and cases in `daily.yml`, and the target hour in its
+**Changing the times.** Each email needs two cron lines in `daily.yml` (the PDT and PST
+UTC hours) and a matching entry in the schedule check. Its hour also goes in the
 "Wait until" step.
 
 **Manual runs.** Actions tab → "Daily design internship digest" → **Run workflow** sends
