@@ -47,10 +47,6 @@ Mon 27 · Tue 20 · Wed 17 · Thu 17 · Fri 23 · Sat 0 · Sun 2
 Recruiters post during US business hours on weekdays: about 83% between 6am and 6pm
 Seattle (9am–9pm Eastern), and almost nothing in the evening or on weekends.
 
-Jobright's alerts suggest otherwise: their "just posted" times peak at 6–9pm and include
-weekends. That peak is when Jobright finds jobs and sends alerts, often hours after the
-company posted, so the company data above is the one to plan around.
-
 **Why 11am, 3pm and 9pm.** How long a job waits for the next email, using the posting
 times above:
 
@@ -69,9 +65,9 @@ times above:
   still leaves 10+ hours to apply within 24 hours. Putting all the emails in the daytime
   would push the worst case to 18 hours.
 - **Freshness differs by source.** Jobs from company career sites are checked the moment
-  each email is built. Jobs from alert emails (Jobright, Lenny's Jobs, Handshake) arrive
-  later, often hours later. They show "received via Jobright on Sep 18" instead of a
-  posting date, because alerts don't include one.
+  each email is built. Jobs from job-alert emails arrive later, often hours later.
+  They show the date the alert arrived instead of a posting date, because alerts don't
+  include one.
 
 **Getting the email on time.** GitHub starts scheduled jobs late when it's busy,
 especially exactly on the hour (one 9pm run once started five hours late). So the
