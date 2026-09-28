@@ -68,6 +68,8 @@ NO_SPONSOR_RE = re.compile(
     r"[^.]{0,40}sponsor|"
     r"without (the need for )?(current or future |future )?(visa |employment )?sponsorship|"
     r"(does not|do not|doesn't|don't) (offer |provide )?(visa |immigration )?sponsor|"
+    r"not (be )?(eligible|available) for (any )?(work |visa |employment |immigration )?sponsorship|"
+    r"not (eligible|available|open) (for|to) (f-?1|j-?1|international students|cpt|opt)|"
     r"u\.?s\.? citizen(ship)? (is )?required|must be a u\.?s\.? citizen|security clearance",
     re.I,
 )
@@ -132,8 +134,25 @@ def is_design_role(title):
     return bool(ROLE_RE.search(title) and not EXCLUDE_RE.search(title))
 
 
-def is_design_internship(title):
-    return is_design_role(title) and bool(INTERN_RE.search(title))
+# "Research Intern" alone could be UX or machine learning; the description decides.
+GENERIC_RESEARCH_RE = re.compile(r"\bresearch(er)?\b", re.I)
+UX_RESEARCH_CONTEXT_RE = re.compile(
+    r"user research|ux research|user researcher|research (and|&) insights|usability|"
+    r"design research|qualitative research|user experience research|research ops",
+    re.I,
+)
+
+
+def maybe_ux_research(title):
+    """A generic research internship that needs its description checked."""
+    return bool(INTERN_RE.search(title) and GENERIC_RESEARCH_RE.search(title)
+                and not EXCLUDE_RE.search(title))
+
+
+def is_design_internship(title, text=None):
+    if is_design_role(title) and INTERN_RE.search(title):
+        return True
+    return bool(text and maybe_ux_research(title) and UX_RESEARCH_CONTEXT_RE.search(text))
 
 
 def job(company, title, url, locations, source, sponsorship, posted=None):
@@ -155,7 +174,8 @@ def from_greenhouse(slug):
     company = data.get("meta", {}).get("name") if isinstance(data.get("meta"), dict) else None
     out = []
     for j in data.get("jobs", []):
-        if not is_design_internship(j["title"]):
+        text = strip_html(j.get("content")) if maybe_ux_research(j["title"]) else None
+        if not is_design_internship(j["title"], text):
             continue
         locs = [(j.get("location") or {}).get("name", "")]
         locs += [o.get("name", "") for o in j.get("offices", [])]
@@ -171,12 +191,12 @@ def from_lever(slug):
     data = fetch_json(f"https://api.lever.co/v0/postings/{slug}?mode=json")
     out = []
     for j in data:
-        if not is_design_internship(j["text"]):
+        text = " ".join([j.get("descriptionPlain", ""), j.get("additionalPlain", "")]
+                        + [strip_html(l.get("content", "")) for l in j.get("lists", [])])
+        if not is_design_internship(j["text"], text):
             continue
         cats = j.get("categories", {})
         locs = cats.get("allLocations") or [cats.get("location", "")]
-        text = " ".join([j.get("descriptionPlain", ""), j.get("additionalPlain", "")]
-                        + [strip_html(l.get("content", "")) for l in j.get("lists", [])])
         posted = datetime.datetime.fromtimestamp(j["createdAt"] / 1000, datetime.timezone.utc).date().isoformat()
         out.append(job(slug.title(), j["text"], j["hostedUrl"], locs, "Lever",
                        sponsorship_from_text(text), posted))
@@ -187,7 +207,7 @@ def from_ashby(slug):
     data = fetch_json(f"https://api.ashbyhq.com/posting-api/job-board/{urllib.parse.quote(slug)}")
     out = []
     for j in data.get("jobs", []):
-        if not is_design_internship(j["title"]):
+        if not is_design_internship(j["title"], j.get("descriptionPlain", "")):
             continue
         locs = [j.get("location", "")] + [
             s.get("location", "") for s in j.get("secondaryLocations", [])
@@ -206,11 +226,13 @@ def from_smartrecruiters(slug):
     while True:  # keyword search is unreliable here, so page through everything
         page = fetch_json(f"{base}?limit=100&offset={offset}")
         for j in page.get("content", []):
-            if not is_design_internship(j["name"]):
+            if not (is_design_internship(j["name"]) or maybe_ux_research(j["name"])):
                 continue
             detail = fetch_json(f"{base}/{j['id']}")
             sections = (detail.get("jobAd") or {}).get("sections", {})
             text = " ".join(strip_html(s.get("text")) for s in sections.values())
+            if not is_design_internship(j["name"], text):
+                continue
             loc = j.get("location", {})
             locs = [loc.get("fullLocation", "")] + (["Remote"] if loc.get("remote") else [])
             out.append(job(j["company"]["name"], j["name"],
@@ -237,13 +259,16 @@ def from_workday(site):
                     "searchText": term}
             postings = fetch_json(f"{api}/jobs", body).get("jobPostings", [])
             for p in postings:
-                if is_design_internship(p.get("title", "")):
-                    paths[p["externalPath"]] = p["title"]
+                title = p.get("title", "")
+                if is_design_internship(title) or maybe_ux_research(title):
+                    paths[p["externalPath"]] = title
             if len(postings) < 20:
                 break
     out = []
     for path, title in paths.items():
         info = fetch_json(f"{api}{path}").get("jobPostingInfo", {})
+        if not is_design_internship(title, strip_html(info.get("jobDescription"))):
+            continue  # a generic "Research Intern" that isn't UX research
         locs = [info.get("location", "")] + info.get("additionalLocations", [])
         out.append(job(site["company"], title, f"https://{host}/{name}{path}", locs, "Workday",
                        sponsorship_from_text(strip_html(info.get("jobDescription"))),
@@ -821,13 +846,15 @@ def from_moka(site):
 def from_atlassian():
     seen, out = set(), []
     for j in fetch_json("https://www.atlassian.com/endpoint/careers/listings"):
-        if j["id"] in seen or not is_design_internship(j.get("title", "")):
+        text = strip_html(" ".join(str(j.get(k) or "") for k in
+                                   ("overview", "responsibilities", "qualifications")))
+        if j["id"] in seen or not is_design_internship(j.get("title", ""), text):
             continue
         seen.add(j["id"])
         post = j.get("portalJobPost") or {}
         out.append(job("Atlassian", j["title"],
                        f"https://www.atlassian.com/company/careers/details/{j['id']}",
-                       j.get("locations", []), "Atlassian", "Not stated",
+                       j.get("locations", []), "Atlassian", sponsorship_from_text(text),
                        (post.get("updatedDate") or "")[:10] or None))
     return out
 
