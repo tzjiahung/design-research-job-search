@@ -134,8 +134,14 @@ GENERIC_DESIGN_RE = re.compile("|".join(config.GENERIC_DESIGN_PATTERNS), re.I)
 OTHER_DESIGN_FIELD_RE = re.compile("|".join(config.OTHER_DESIGN_FIELDS), re.I)
 
 
+UX_ONLY_WITH_RE = re.compile("|".join(config.UX_ONLY_WITH), re.I)
+CLEAR_UX_RE = re.compile("|".join(config.CLEAR_UX_TERMS), re.I)
+
+
 def is_design_role(title):
     if EXCLUDE_RE.search(title):
+        return False
+    if UX_ONLY_WITH_RE.search(title) and not CLEAR_UX_RE.search(title):
         return False
     return bool(ROLE_RE.search(title) or (GENERIC_DESIGN_RE.search(title)
                                            and not OTHER_DESIGN_FIELD_RE.search(title)))
@@ -205,7 +211,7 @@ def from_lever(slug):
         cats = j.get("categories", {})
         locs = cats.get("allLocations") or [cats.get("location", "")]
         posted = datetime.datetime.fromtimestamp(j["createdAt"] / 1000, datetime.timezone.utc).date().isoformat()
-        out.append(job(slug.title(), j["text"], j["hostedUrl"], locs, "Lever",
+        out.append(job(config.NAMES.get(slug, slug.title()), j["text"], j["hostedUrl"], locs, "Lever",
                        sponsorship_from_text(text), posted))
     return out
 

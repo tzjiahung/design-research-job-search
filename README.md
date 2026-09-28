@@ -5,12 +5,14 @@ UX research internship in the US, Singapore, Hong Kong, London and Taiwan. Each 
 once, even when several boards list it.
 
 **Sources:**
-- ~80 companies' own job boards on Greenhouse, Lever, Ashby and SmartRecruiters (Figma, Airbnb, Stripe,
-  Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...)
+- ~100 companies' own job boards on Greenhouse, Lever, Ashby and SmartRecruiters (Figma, Airbnb, Stripe,
+  Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...), including hardware
+  and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, Skydio, Figure, 1X,
+  Agility Robotics, Lucid, Zoox, Nuro, Motional, Wayve)
 - Big-company sites: Google, Meta, Apple, Microsoft, Amazon/AWS, NVIDIA, Adobe, IBM,
   ByteDance/TikTok, Atlassian, Salesforce/Slack, Walmart, Boeing, Nordstrom, Expedia,
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
-  Foxconn, DocuSign, GitHub, MathWorks, ...
+  Foxconn, Logitech, Sonos, DocuSign, GitHub, MathWorks, ...
 - The SimplifyJobs and Intern Dock internship lists, and Y Combinator startups
 - Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs), read without changing anything
 
@@ -60,10 +62,14 @@ There are two more ways in:
   internships stay out.
 
 **2. None of these words** (`EXCLUDE_PATTERNS`). They remove engineering and chip-design
-jobs that share design vocabulary: engineer, developer, programmer, hardware, mechanical,
+jobs that share design vocabulary: engineer, developer, programmer, mechanical,
 electrical, circuit, chip, IC, RFIC, ASIC, analog, mixed-signal, verification, physical
 design, digital design, civil, structural, water. So "UX Engineer" and "Product Design
 Engineer" are left out.
+
+"Hardware" is allowed only next to a clear UX term (`UX_ONLY_WITH`, `CLEAR_UX_TERMS`): UX,
+UI, user experience, user research, interaction design, human factors or HCI. So "UX
+Research Intern, Hardware" counts, but "Hardware Design Intern" (chip design) doesn't.
 
 **3. An internship word** (`INTERN_PATTERNS`): intern, internship, co-op, placement,
 "Summer 2027" (any year), "Summer Analyst" / "Summer Associate" (how banks name them),

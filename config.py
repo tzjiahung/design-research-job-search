@@ -46,7 +46,6 @@ EXCLUDE_PATTERNS = [
     r"engineer",
     r"developer",
     r"verification",
-    r"hardware",
     r"mechanical",
     r"circuit",
     r"asic",
@@ -59,6 +58,15 @@ EXCLUDE_PATTERNS = [
     r"mixed.signal",
     r"programmer",
     r"civil", r"structural", r"\bwater\b", r"electrical",
+]
+
+# Excluded too, unless the title also has a clear UX term, so "Hardware UX Design Intern"
+# or "UX Research Intern, Hardware" count but "Hardware Design Intern" (chips) doesn't.
+UX_ONLY_WITH = [r"hardware"]
+CLEAR_UX_TERMS = [
+    r"\bux\b", r"\bui\b", r"\bui ?/?ux\b", r"user experience", r"user research",
+    r"ux research", r"interaction design", r"human factors", r"\bhci\b",
+    r"human[- ]computer interaction", r"human[- ]centered design",
 ]
 
 # A title must match one of these to count as an internship.
@@ -89,11 +97,14 @@ GREENHOUSE = [
     "coursera", "pitchbookdata", "samsungresearchamerica", "samsungsemiconductor",
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
     "thealleninstitute", "stackadapt",
+    # hardware / devices / robotics / vehicles
+    "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional", "wayve",
 ]
-LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning"]
+LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning", "zoox"]
 ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "thoughtworks", "Superhuman Platform Inc", "mobbin.com",
+    "whoop", "eightsleep", "skydio", "1x",
 ]
 # Studios/brands that repost the same job; treated as one company when de-duplicating.
 COMPANY_ALIASES = {
@@ -102,7 +113,8 @@ COMPANY_ALIASES = {
 }
 
 # Display names for boards whose slug isn't the company name.
-NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mobbin"}
+NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mobbin",
+         "whoop": "WHOOP", "eightsleep": "Eight Sleep", "1x": "1X", "zoox": "Zoox"}
 SMARTRECRUITERS = ["wise", "servicenow"]
 
 # Big-company career sites. "facets" narrows a Workday search (IDs come from the site).
@@ -143,6 +155,9 @@ WORKDAY = [
      "site": "External"},
     {"company": "Seattle Children's", "host": "seattlechildrens.wd5.myworkdayjobs.com",
      "tenant": "seattlechildrens", "site": "External"},
+    {"company": "Logitech", "host": "logitech.wd5.myworkdayjobs.com", "tenant": "logitech",
+     "site": "Logitech"},
+    {"company": "Sonos", "host": "sonos.wd1.myworkdayjobs.com", "tenant": "sonos", "site": "Sonos"},
     {"company": "Expedia", "host": "expedia.wd108.myworkdayjobs.com", "tenant": "expedia",
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
