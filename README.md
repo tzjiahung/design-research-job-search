@@ -23,6 +23,60 @@ has only jobs you haven't been sent. If nothing is new, you still get a short "N
 design internships" email. Jobs already sent are remembered in `seen.json`, which the
 Action updates on its own.
 
+## Which jobs count
+
+A job title has to pass three checks. The lists live in [config.py](config.py), and
+capitals don't matter.
+
+**1. A design keyword** (`ROLE_PATTERNS`)
+
+| Keyword | Also catches | Example |
+|---|---|---|
+| UX | UX Designer, UX Writer, UX Researcher | UX Design Intern |
+| UI, UI/UX, UIUX | | UI/UX Intern |
+| user experience | | 2027 Summer Internship – User Experience |
+| product design | Product Designer | Product Design Intern |
+| experience design, interaction design, visual design | …Designer | Internship – Interaction Design |
+| brand / service / web / communication / creative design | …Designer | Brand Design Intern |
+| user research, UX research, design research, experience research | User Researcher | User Research Intern |
+| design and research | | Graduate Intern, Design and Research |
+| HCI, human-computer interaction, human factors, human-centered design | | Human Factors Intern |
+| information architecture / architect, design technologist, design system | | Design System Design Intern |
+| product builder, "(Design)" | | Digital Village (Design) |
+| Chinese: 使用者經驗, 使用者體驗, 使用者研究, 介面設計, 互動設計, 視覺設計, 產品設計, 體驗設計 (and simplified) | | 產品設計實習生 |
+
+There are two more ways in:
+- **Plain "Design(er) Intern(ship)"** (`GENERIC_DESIGN_PATTERNS`) counts when nothing comes
+  before "Design": at the start of the title ("Designer Intern – Austin"), after a dash,
+  comma, season or year ("Summer 2027 Design Intern"), or "Intern, Design". Otherwise
+  engineering titles like "Propulsion Design Intern" would slip in. It also doesn't
+  count if the title names another design field (`OTHER_DESIGN_FIELDS`): graphic,
+  industrial, interior, fashion, landscape, architecture, instructional, learning,
+  packaging, lighting, textile, jewelry, apparel, footwear, garden, kitchen, floral,
+  print, motion.
+- **Plain "Research Intern"** counts when the job description shows it's UX or user
+  research (it mentions user research, UX research, Research & Insights, usability,
+  design research or qualitative research). Machine-learning and science research
+  internships stay out.
+
+**2. None of these words** (`EXCLUDE_PATTERNS`). They remove engineering and chip-design
+jobs that share design vocabulary: engineer, developer, programmer, hardware, mechanical,
+electrical, circuit, chip, IC, RFIC, ASIC, analog, mixed-signal, verification, physical
+design, digital design, civil, structural, water. So "UX Engineer" and "Product Design
+Engineer" are left out.
+
+**3. An internship word** (`INTERN_PATTERNS`): intern, internship, co-op, placement,
+"Summer 2027" (any year), "Summer Analyst" / "Summer Associate" (how banks name them),
+實習 / 实习. Sources that only list internships (SimplifyJobs, Intern Dock, TikTok's
+intern board) skip this check.
+
+**Not included on purpose:** Content Design, graphic, industrial and motion design, and
+"X Design Intern" titles where X is an engineering field. To change any of this, edit
+the lists in `config.py`.
+
+**Locations** (`REGIONS`): US, Singapore, Hong Kong, London and Taiwan. Remote roles count
+unless they're tied to another country.
+
 ## When emails arrive, and why
 
 The goal is to see every new internship early enough to **apply within 24 hours of it
@@ -114,5 +168,11 @@ Writes `digest.html` without sending anything or touching `seen.json`.
 
 ## Sponsorship labels
 
-- **Sponsors** / **No sponsorship**: the posting says so explicitly.
-- **Not stated**: most postings don't say; ask the recruiter.
+Read from the job description where the source provides one.
+
+- **No sponsorship**: the posting rules it out. Examples: "unable to sponsor", "without
+  current or future sponsorship", "not available for any work sponsorship", "not eligible
+  for F-1/J-1 students", "U.S. citizenship required", "security clearance".
+- **Sponsors**: the posting says sponsorship is available.
+- **Not stated**: the posting doesn't say, or the source has no description (alert
+  emails, lists like Intern Dock). Check the posting or ask the recruiter.
