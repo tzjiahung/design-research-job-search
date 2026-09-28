@@ -7,12 +7,13 @@ once, even when several boards list it.
 **Sources:**
 - ~100 companies' own job boards on Greenhouse, Lever, Ashby and SmartRecruiters (Figma, Airbnb, Stripe,
   Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...), including hardware
-  and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, Skydio, Figure, 1X,
-  Agility Robotics, Lucid, Zoox, Nuro, Motional, Wayve)
+  and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, GoPro, Skydio, Figure,
+  1X, Agility Robotics, Anduril, Lucid, Zoox, Nuro, Motional, Wayve)
 - Big-company sites: Google, Meta, Apple, Microsoft, Amazon/AWS, NVIDIA, Adobe, IBM,
   ByteDance/TikTok, Atlassian, Salesforce/Slack, Walmart, Boeing, Nordstrom, Expedia,
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
-  Foxconn, Logitech, Sonos, DocuSign, GitHub, MathWorks, ...
+  Foxconn, Garmin, Rivian, Snap, Logitech, Sonos, Bose, Dyson, DocuSign, GitHub,
+  MathWorks, ...
 - The SimplifyJobs and Intern Dock internship lists, and Y Combinator startups
 - Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs), read without changing anything
 

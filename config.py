@@ -99,6 +99,7 @@ GREENHOUSE = [
     "thealleninstitute", "stackadapt",
     # hardware / devices / robotics / vehicles
     "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional", "wayve",
+    "goprojobs", "andurilindustries",
 ]
 LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning", "zoox"]
 ASHBY = [
@@ -114,7 +115,8 @@ COMPANY_ALIASES = {
 
 # Display names for boards whose slug isn't the company name.
 NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mobbin",
-         "whoop": "WHOOP", "eightsleep": "Eight Sleep", "1x": "1X", "zoox": "Zoox"}
+         "whoop": "WHOOP", "eightsleep": "Eight Sleep", "1x": "1X", "zoox": "Zoox",
+         "goprojobs": "GoPro", "andurilindustries": "Anduril"}
 SMARTRECRUITERS = ["wise", "servicenow"]
 
 # Big-company career sites. "facets" narrows a Workday search (IDs come from the site).
@@ -158,6 +160,10 @@ WORKDAY = [
     {"company": "Logitech", "host": "logitech.wd5.myworkdayjobs.com", "tenant": "logitech",
      "site": "Logitech"},
     {"company": "Sonos", "host": "sonos.wd1.myworkdayjobs.com", "tenant": "sonos", "site": "Sonos"},
+    {"company": "Bose", "host": "boseallaboutme.wd503.myworkdayjobs.com",
+     "tenant": "boseallaboutme", "site": "Bose_Careers"},
+    {"company": "Dyson", "host": "dyson.wd3.myworkdayjobs.com", "tenant": "dyson",
+     "site": "dyson_careers"},
     {"company": "Expedia", "host": "expedia.wd108.myworkdayjobs.com", "tenant": "expedia",
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
@@ -174,6 +180,10 @@ ORACLE = [
 JIBE = [
     {"company": "DocuSign", "base": "https://careers.docusign.com"},
     {"company": "GitHub", "base": "https://www.github.careers"},
+    {"company": "Garmin", "base": "https://careers.garmin.com",
+     "job_url": "https://careers.garmin.com/jobs/{req_id}?lang=en-us"},
+    {"company": "Rivian", "base": "https://careers.rivian.com",
+     "job_url": "https://careers.rivian.com/careers-home/jobs/{req_id}?lang=en-us"},
 ]
 PHENOM = [
     {"company": "Honda", "base": "https://careers.honda.com"},

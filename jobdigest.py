@@ -38,7 +38,16 @@ US_STATES = (
     "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH "
     "NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC"
 ).split()
+US_STATE_NAMES = (
+    "alabama|alaska|arizona|arkansas|california|colorado|connecticut|delaware|florida|"
+    "georgia|hawaii|idaho|illinois|indiana|iowa|kansas|kentucky|louisiana|maine|maryland|"
+    "massachusetts|michigan|minnesota|mississippi|missouri|montana|nebraska|nevada|"
+    "new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|"
+    "oregon|pennsylvania|rhode island|south carolina|south dakota|tennessee|texas|utah|"
+    "vermont|virginia|washington|west virginia|wisconsin|wyoming|district of columbia"
+)
 US_RE = re.compile(
+    r",\s*(" + US_STATE_NAMES + r")\b|"  # "Olathe, Kansas"
     r"united states|\busa?\b|u\.s\.|\bnyc\b|\bsf\b|new york|san francisco|seattle|"
     r"boston|chicago|los angeles|austin|san jose|mountain view|palo alto|menlo park|"
     r"sunnyvale|cupertino|redmond|bellevue|kirkland|san diego|san mateo|culver city|"
@@ -183,18 +192,22 @@ def job(company, title, url, locations, source, sponsorship, posted=None):
 # ---------- sources ----------
 
 def from_greenhouse(slug):
-    data = fetch_json(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true")
-    company = data.get("meta", {}).get("name") if isinstance(data.get("meta"), dict) else None
+    # List without descriptions (some boards have thousands of jobs), then fetch the
+    # description only for jobs that might match.
+    api = f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs"
     out = []
-    for j in data.get("jobs", []):
-        text = strip_html(j.get("content")) if maybe_ux_research(j["title"]) else None
-        if not is_design_internship(j["title"], text):
+    for j in fetch_json(api).get("jobs", []):
+        title = j["title"]
+        if not (is_design_internship(title) or maybe_ux_research(title)):
+            continue
+        text = strip_html(fetch_json(f"{api}/{j['id']}").get("content"))
+        if not is_design_internship(title, text):
             continue
         locs = [(j.get("location") or {}).get("name", "")]
         locs += [o.get("name", "") for o in j.get("offices", [])]
         out.append(job(
-            company or j.get("company_name") or slug.title(), j["title"], j["absolute_url"],
-            locs, "Greenhouse", sponsorship_from_text(strip_html(j.get("content"))),
+            config.NAMES.get(slug) or j.get("company_name") or slug.title(), title,
+            j["absolute_url"], locs, "Greenhouse", sponsorship_from_text(text),
             (j.get("first_published") or j.get("updated_at") or "")[:10] or None,
         ))
     return out
@@ -540,21 +553,42 @@ def from_tiktok():
 
 
 def from_jibe(site):
-    """Careers sites built on Jibe/iCIMS (DocuSign, GitHub)."""
+    """Careers sites built on Jibe/iCIMS (DocuSign, GitHub, Garmin, Rivian)."""
     found = {}
-    for term in SEARCH_TERMS:
+    for term in SEARCH_TERMS + ["UX"]:
         data = fetch_json(f"{site['base']}/api/jobs?"
-                          + urllib.parse.urlencode({"keywords": term, "page": 1, "limit": 50}))
+                          + urllib.parse.urlencode({"keywords": term, "page": 1, "limit": 100}))
         for item in data.get("jobs", []):
             j = item.get("data", {})
-            if is_design_internship(j.get("title", "")):
+            title = j.get("title", "")
+            text = strip_html(j.get("description")) if maybe_ux_research(title) else None
+            if is_design_internship(title, text):
                 found[j["req_id"]] = j
-    return [job(site["company"], j["title"],
-                (j.get("meta_data") or {}).get("canonical_url") or j.get("apply_url"),
-                [j.get("full_location", "")], site["company"],
-                sponsorship_from_text(strip_html(j.get("description"))),
+
+    def url(j):
+        if site.get("job_url"):  # some sites don't return their own job-page link
+            return site["job_url"].format(req_id=j["req_id"])
+        return (j.get("meta_data") or {}).get("canonical_url") or j.get("apply_url")
+
+    return [job(site["company"], j["title"], url(j), [j.get("full_location", "")],
+                site["company"], sponsorship_from_text(strip_html(j.get("description"))),
                 (j.get("posted_date") or "")[:10] or None)
             for j in found.values()]
+
+
+def from_snap():
+    """Snap's careers site returns every job in one response."""
+    data = fetch_json("https://careers.snap.com/api/jobs")
+    out = []
+    for hit in data.get("body", []):
+        j = hit.get("_source", {})
+        title = j.get("title", "")
+        intern = j.get("employment_type") == "Intern" or INTERN_RE.search(title)
+        if not (intern and is_design_role(title)):
+            continue
+        locs = [o.get("location", "") for o in j.get("offices") or []] or [j.get("primary_location", "")]
+        out.append(job("Snap", title, j.get("absolute_url"), locs, "Snap", "Not stated"))
+    return out
 
 
 def from_microsoft():
@@ -975,6 +1009,10 @@ def parse_jobright(body):
     return out
 
 
+# Sources that are job-alert emails rather than the company's own site.
+ALERT_SOURCES = {"Handshake", "Jobright", "Lenny's Jobs"}
+
+
 # Which parser handles alerts from which sender (matched anywhere in the email,
 # so alerts forwarded from another inbox work too).
 ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobright,
@@ -1119,6 +1157,7 @@ def collect():
         ("sound-transit", from_sound_transit), ("allen-institute", from_allen_institute),
         ("accenture", from_accenture), ("mckinsey", from_mckinsey),
         ("email alerts", from_email_alerts), ("interndock", from_interndock),
+        ("snap", from_snap),
     ]]
     tasks += [(f"successfactors:{s['company']}", from_successfactors, s)
               for s in config.SUCCESSFACTORS]
@@ -1225,7 +1264,9 @@ def render(new_jobs, total_open, first_run, errors):
             continue
         parts.append(f'<h3 style="margin:24px 0 8px">{region} ({len(rows)})</h3>')
         for j in rows:
-            primary = next(iter(j["links"].values()))
+            # Prefer the company's own page over an alert email's link.
+            primary = next((u for src, u in j["links"].items() if src not in ALERT_SOURCES),
+                           next(iter(j["links"].values())))
             others = " · ".join(
                 f'<a href="{html.escape(u)}" style="color:#5f6368">{html.escape(s)}</a>'
                 for s, u in j["links"].items()
