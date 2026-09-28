@@ -130,8 +130,15 @@ def regions_for(locations):
     return found
 
 
+GENERIC_DESIGN_RE = re.compile("|".join(config.GENERIC_DESIGN_PATTERNS), re.I)
+OTHER_DESIGN_FIELD_RE = re.compile("|".join(config.OTHER_DESIGN_FIELDS), re.I)
+
+
 def is_design_role(title):
-    return bool(ROLE_RE.search(title) and not EXCLUDE_RE.search(title))
+    if EXCLUDE_RE.search(title):
+        return False
+    return bool(ROLE_RE.search(title) or (GENERIC_DESIGN_RE.search(title)
+                                           and not OTHER_DESIGN_FIELD_RE.search(title)))
 
 
 # "Research Intern" alone could be UX or machine learning; the description decides.

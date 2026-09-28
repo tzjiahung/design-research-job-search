@@ -17,11 +17,28 @@ ROLE_PATTERNS = [
     r"(brand|service|web|communication|creative) design",
     r"\bui ?/?ux\b",  # "UIUX", "UI/UX"
     r"design and research",
-    r"^design intern",
+    r"\bhci\b", r"human[- ]computer interaction", r"human factors", r"human[- ]centered design",
+    r"information architect",  # "Information Architect(ure)"
+    r"design technologist",
+    r"design system",
     r"\(design\)",  # e.g. KPMG's "Digital Village (Design)"
     # Chinese titles (Taiwan / Hong Kong): UX, UI, interaction, visual, product design, user research
     r"使用者經驗", r"使用者體驗", r"使用者研究", r"介面設計", r"互動設計", r"視覺設計",
     r"產品設計", r"體驗設計", r"用戶體驗", r"用户体验", r"交互设计", r"产品设计", r"用户研究",
+]
+
+# Plain "Design(er) Intern(ship)" titles count too, but only with nothing in front of
+# "Design" (start of title, after a dash/comma, or after a season/year), because
+# "Propulsion Design Intern" or "Roadway Design Intern" are engineering jobs. A title with
+# UX or product in it already matches above.
+GENERIC_DESIGN_PATTERNS = [
+    r"(^|[-–—,|(:/]\s*|\b(summer|fall|winter|spring|20\d\d)\s+)design(er)?\s+intern",
+    r"^intern(ship)?\s*[,:-]\s*design(er)?\b",  # "Intern, Design"
+]
+OTHER_DESIGN_FIELDS = [
+    r"graphic", r"industrial", r"interior", r"fashion", r"landscape", r"architectur",
+    r"instructional", r"learning", r"packaging", r"lighting", r"textile", r"jewel",
+    r"apparel", r"footwear", r"garden", r"kitchen", r"floral", r"print", r"motion",
 ]
 
 # ...and must NOT match any of these (filters out chip design, "UX Engineer", etc.).
