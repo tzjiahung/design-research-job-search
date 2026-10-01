@@ -1009,14 +1009,34 @@ def parse_jobright(body):
     return out
 
 
+def parse_linkedin(body):
+    """LinkedIn job alerts (jobalerts-noreply@linkedin.com), single-job and round-ups.
+    Each card: a bold title linking to /jobs/view/<id>, then "Company · Location"."""
+    out = []
+    for card in body.split('data-test-id="job-card"')[1:]:
+        link = re.search(r'<a href="([^"]*/jobs/view/(\d+)[^"]*)"[^>]*class="font-bold[^>]*>(.*?)</a>',
+                         card, re.S)
+        info = re.search(r"</a>\s*</td>\s*</tr>\s*<tr>\s*<td[^>]*>\s*<p[^>]*>(.*?)</p>", card, re.S)
+        if not (link and info):
+            continue
+        title = text_of(link.group(3))
+        if not is_design_internship(title):
+            continue
+        company, _, loc = text_of(info.group(1)).partition(" · ")
+        loc = re.sub(r"\s*\((On-site|Hybrid)\)", "", loc).replace("(Remote)", "/ Remote").strip()
+        out.append(job(company.strip(), title, f"https://www.linkedin.com/jobs/view/{link.group(2)}/",
+                       [loc], "LinkedIn", "Not stated"))
+    return out
+
+
 # Sources that are job-alert emails rather than the company's own site.
-ALERT_SOURCES = {"Handshake", "Jobright", "Lenny's Jobs"}
+ALERT_SOURCES = {"Handshake", "Jobright", "Lenny's Jobs", "LinkedIn"}
 
 
 # Which parser handles alerts from which sender (matched anywhere in the email,
 # so alerts forwarded from another inbox work too).
 ALERT_PARSERS = {"joinhandshake.com": parse_handshake, "jobright.ai": parse_jobright,
-                 "trueup.io": parse_trueup}
+                 "trueup.io": parse_trueup, "jobalerts-noreply@linkedin.com": parse_linkedin}
 
 # How far back to read alert emails. The first run looks back further so the first
 # digest includes everything your alerts have already sent you.

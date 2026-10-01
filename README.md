@@ -15,7 +15,7 @@ once, even when several boards list it.
   Foxconn, Garmin, Rivian, Snap, Logitech, Sonos, Bose, Dyson, DocuSign, GitHub,
   MathWorks, ...
 - The SimplifyJobs and Intern Dock internship lists, and Y Combinator startups
-- Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs), read without changing anything
+- Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs, LinkedIn), read without changing anything
 
 Edit [config.py](config.py) to change roles, regions or companies. A company that can't
 be read on a given day is listed at the bottom of the email instead of breaking it.
@@ -130,20 +130,25 @@ times above:
   They show the date the alert arrived instead of a posting date, because alerts don't
   include one.
 
-**Getting the email on time.** GitHub starts scheduled jobs late when it's busy,
-especially exactly on the hour (one 9pm run once started five hours late). So the
-schedule in [.github/workflows/daily.yml](.github/workflows/daily.yml) starts each run
-at :37, about 20 minutes early, which is a quieter minute. The job then waits until the
-exact hour before sending. Delays of up to ~20 minutes don't change when the email arrives. A longer
-delay makes the email late, but it still arrives.
+**Getting the email on time.** GitHub's own scheduler started runs 4–6 hours late (a
+10:37am run started at 2:30pm, an 8:37pm run at 3am). So the times are kept by
+[cron-job.org](https://cron-job.org) instead, set to Seattle time (daylight saving is
+handled there). At 10:58am, 2:58pm and 8:58pm it presses "Run workflow" through GitHub's
+API, which starts within seconds, and the email arrives about two minutes later.
 
-**Daylight saving.** GitHub schedules in UTC, and Seattle is UTC-7 in summer and UTC-8 in
-winter, so each time is scheduled at both UTC hours. A check at the start of the job
-skips whichever one doesn't match Seattle's clock that day.
+**cron-job.org setup (once).**
+1. GitHub → Settings → Developer settings → Fine-grained personal access tokens →
+   Generate new token. Repository access: only this repo. Permissions: **Actions: Read
+   and write**. Expiration: up to a year (renew it when GitHub emails you).
+2. cron-job.org → Create cronjob, three times (or one job, then copy it):
+   - URL: `https://api.github.com/repos/tzjiahung/design-research-job-search/actions/workflows/daily.yml/dispatches`
+   - Schedule: custom, every day, at 10:58 / 14:58 / 20:58; time zone **America/Los_Angeles**
+   - Advanced → Request method **POST**; headers
+     `Authorization: Bearer <token>`, `Accept: application/vnd.github+json`,
+     `Content-Type: application/json`; body `{"ref":"main"}`
+   - "Test run" should return **204**, and a run appears in the Actions tab.
 
-**Changing the times.** Each email needs two cron lines in `daily.yml` (the PDT and PST
-UTC hours) and a matching entry in the schedule check. Its hour also goes in the
-"Wait until" step.
+**Changing the times.** Edit the cron-job.org jobs. Nothing in the repo changes.
 
 **Manual runs.** Actions tab → "Daily design internship digest" → **Run workflow** sends
 an email right away. Its "How far back to read job-alert emails" box takes a number of
