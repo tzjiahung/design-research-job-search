@@ -98,14 +98,14 @@ GREENHOUSE = [
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
     "thealleninstitute", "stackadapt",
     # hardware / devices / robotics / vehicles
-    "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional", "wayve",
+    "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional",
     "goprojobs", "andurilindustries",
 ]
 LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning", "zoox"]
 ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
-    "patreon", "thoughtworks", "Superhuman Platform Inc", "mobbin.com",
-    "whoop", "eightsleep", "skydio", "1x",
+    "patreon", "Superhuman Platform Inc", "mobbin.com",
+    "whoop", "eightsleep", "skydio", "1x", "wayve",
 ]
 # Studios/brands that repost the same job; treated as one company when de-duplicating.
 COMPANY_ALIASES = {

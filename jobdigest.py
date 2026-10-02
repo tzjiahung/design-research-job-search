@@ -101,16 +101,24 @@ def fetch(url, body=None, ua=BROWSER_UA, headers=None):
         data = json.dumps(body).encode()
         headers["Content-Type"] = "application/json"
     req = urllib.request.Request(url, data=data, headers=headers)
-    for attempt in range(4):
+    return read_with_retries(urllib.request.urlopen, req)
+
+
+def read_with_retries(open_url, req):
+    """Open `req` with `open_url`, retrying when the site is busy or rate-limiting us.
+    Big sites (Microsoft, ByteDance) sometimes rate-limit GitHub's shared servers for
+    a minute or two, so waits grow to ~1.5 minutes and follow the site's Retry-After."""
+    for attempt in range(5):
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with open_url(req, timeout=60) as resp:
                 return resp.read()
         except urllib.error.HTTPError as exc:
-            if exc.code not in (429, 500, 502, 503, 504) or attempt == 3:
+            if exc.code not in (429, 500, 502, 503, 504) or attempt == 4:
                 raise
-            time.sleep(5 * 2 ** attempt)  # the site asked us to slow down
+            asked = exc.headers.get("Retry-After", "")
+            time.sleep(min(int(asked), 120) if asked.isdigit() else 6 * 2 ** attempt)
         except (urllib.error.URLError, ConnectionError, TimeoutError):
-            if attempt == 3:
+            if attempt == 4:
                 raise
             time.sleep(5)  # network blip; try again
 
@@ -400,8 +408,7 @@ def session():
 def post_json(opener, url, body, headers):
     req = urllib.request.Request(url, data=json.dumps(body).encode(), headers={
         "User-Agent": BROWSER_UA, "Content-Type": "application/json", **headers})
-    with opener.open(req, timeout=60) as resp:
-        return json.load(resp)
+    return json.loads(read_with_retries(opener.open, req))
 
 
 def from_google():
