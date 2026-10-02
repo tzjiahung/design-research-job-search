@@ -1344,8 +1344,8 @@ def main():
 
     body = render(new_jobs, len(jobs), first_run, errors)
     n = len(new_jobs)
-    subject = (f"{n} {'open' if first_run else 'new'} design/research internship{'s' * (n != 1)}"
-               if new_jobs else "No new design/research internships")
+    subject = (f"🎨 {n} {'open' if first_run else 'new'} design/research internship{'s' * (n != 1)}"
+               if new_jobs else "🎨 No new design/research internships")
     print(f"{len(raw)} listings → {len(jobs)} unique · {len(new_jobs)} new · {len(errors)} errors")
     for e in errors:
         print("  error:", e, file=sys.stderr)
