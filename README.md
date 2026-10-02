@@ -23,7 +23,7 @@ be read on a given day is listed at the bottom of the email instead of breaking 
 **How it works:** a GitHub Action runs [jobdigest.py](jobdigest.py) at 11am, 3pm and 9pm
 Seattle time. The first email listed everything open at the time; since then each email
 has only jobs you haven't been sent. If nothing is new, you still get a short "No new
-design internships" email. Jobs already sent are remembered in `seen.json`, which the
+design/research internships" email. Jobs already sent are remembered in `seen.json`, which the
 Action updates on its own.
 
 ## Which jobs count
