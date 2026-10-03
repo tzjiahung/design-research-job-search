@@ -105,7 +105,7 @@ LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning", "zoox"]
 ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "Superhuman Platform Inc", "mobbin.com",
-    "whoop", "eightsleep", "skydio", "1x", "wayve",
+    "whoop", "eightsleep", "skydio", "1x", "wayve", "harvey",
 ]
 # Studios/brands that repost the same job; treated as one company when de-duplicating.
 COMPANY_ALIASES = {
