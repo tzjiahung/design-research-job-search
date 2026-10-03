@@ -8,6 +8,7 @@ ROLE_PATTERNS = [
     r"product design",
     r"experience design",
     r"interaction design",
+    r"interface design",  # "Human Interface Design", "User Interface Design"
     r"visual design",
     r"product builder",
     r"user research",
