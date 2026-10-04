@@ -1109,39 +1109,23 @@ def from_email_alerts():
 
 
 def from_interndock():
-    """Intern Dock's free Summer 2027 directory. The list is built into one of the site's
-    script files, whose name changes on every deploy, so find it through the main script."""
-    base = "https://www.interndock.com"
-    page = fetch(f"{base}/tracker/guides/summer-2027-internships-complete-directory",
+    """Intern Dock's free Summer 2027 directory. The page is plain HTML: a company
+    heading, then one list item per job, e.g.
+      <h3>Coinbase</h3><ul><li>Product Design Intern — <a href="…">Apply</a> — San Francisco…</li>"""
+    page = fetch("https://www.interndock.com/tracker/guides/summer-2027-internships-complete-directory",
                  headers={"Accept": "text/html"}).decode("utf-8", "replace")
-    main_js = re.search(r'src="(/assets/index-[^"]+\.js)"', page)
-    if not main_js:
-        raise RuntimeError("page layout changed (no main script)")
-    main = fetch(base + main_js.group(1)).decode("utf-8", "replace")
-    guide_js = re.search(r'"\./(Summer2027ComprehensiveGuide-[^"]+\.js)"', main)
-    if not guide_js:
-        raise RuntimeError("page layout changed (no directory script)")
-    data = fetch(f"{base}/assets/{guide_js.group(1)}").decode("utf-8", "replace")
-
-    js_str = r'"((?:[^"\\]|\\.)*)"'
-    unquote = lambda x: json.loads(f'"{x}"')
-    # Company headings and job rows, in page order:
-    #   jsx("h3",{children:"Coinbase"})
-    #   jsxs("li",{children:["Product Design Intern — ",jsx("a",{href:"…"}),"— San Francisco…"]})
-    token = re.compile(r'\.jsxs?\("h3",\{children:' + js_str + r'\}\)'
-                       r'|\.jsxs?\("li",\{children:\[' + js_str + r',\w+\.jsx\("a",\{href:'
-                       + js_str + r'[^}]*\}\),' + js_str)
+    token = re.compile(r'<h3[^>]*>(.*?)</h3>'
+                       r'|<li>([^<]*?)\s*—\s*<a href="([^"]+)"[^>]*>Apply</a>\s*—\s*([^<]*)')
     out, company = [], None
-    for m in token.finditer(data):
+    for m in token.finditer(page):
         if m.group(1) is not None:
-            company = unquote(m.group(1))
+            company = text_of(m.group(1))
             continue
-        title = unquote(m.group(2)).rstrip(" —")
+        title = text_of(m.group(2))
         if company and is_design_role(title):  # the whole directory is internships
-            loc = unquote(m.group(4)).strip(" —")
-            out.append(job(company, title, unquote(m.group(3)), [loc], "Intern Dock",
-                           "Not stated"))
-    if not out and company is None:
+            out.append(job(company, title, html.unescape(m.group(3)), [text_of(m.group(4))],
+                           "Intern Dock", "Not stated"))
+    if company is None:
         raise RuntimeError("page layout changed (no listings found)")
     return out
 
