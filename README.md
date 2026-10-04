@@ -49,14 +49,13 @@ capitals don't matter.
 | Chinese: 使用者經驗, 使用者體驗, 使用者研究, 介面設計, 互動設計, 視覺設計, 產品設計, 體驗設計 (and simplified) | | 產品設計實習生 |
 
 There are two more ways in:
-- **Plain "Design(er) Intern(ship)"** (`GENERIC_DESIGN_PATTERNS`) counts when nothing comes
-  before "Design": at the start of the title ("Designer Intern – Austin"), after a dash,
-  comma, season or year ("Summer 2027 Design Intern"), or "Intern, Design". Otherwise
-  engineering titles like "Propulsion Design Intern" would slip in. It also doesn't
-  count if the title names another design field (`OTHER_DESIGN_FIELDS`): graphic,
-  industrial, interior, fashion, landscape, architecture, instructional, learning,
-  packaging, lighting, textile, jewelry, apparel, footwear, garden, kitchen, floral,
-  print, motion.
+- **Any internship with "Design" or "Designer" in the title** (`GENERIC_DESIGN_PATTERNS`),
+  wherever the words appear: "2027 Summer Intern - Human Interface Design" counts. It
+  doesn't count if the title names another design field or an engineering/science kind
+  of design (`OTHER_DESIGN_FIELDS`): graphic, industrial, interior, fashion, landscape,
+  architecture, instructional, packaging, motion and the like, plus chip, electronics,
+  test, software, protein, game/level and other technical design. If an engineering
+  role still slips through, add the word that gives it away to that list.
 - **Plain "Research Intern"** counts when the job description shows it's UX or user
   research (it mentions user research, UX research, Research & Insights, usability,
   design research or qualitative research). Machine-learning and science research

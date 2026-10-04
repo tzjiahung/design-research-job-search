@@ -28,18 +28,21 @@ ROLE_PATTERNS = [
     r"產品設計", r"體驗設計", r"用戶體驗", r"用户体验", r"交互设计", r"产品设计", r"用户研究",
 ]
 
-# Plain "Design(er) Intern(ship)" titles count too, but only with nothing in front of
-# "Design" (start of title, after a dash/comma, or after a season/year), because
-# "Propulsion Design Intern" or "Roadway Design Intern" are engineering jobs. A title with
-# UX or product in it already matches above.
-GENERIC_DESIGN_PATTERNS = [
-    r"(^|[-–—,|(:/]\s*|\b(summer|fall|winter|spring|20\d\d)\s+)design(er)?\s+intern",
-    r"^intern(ship)?\s*[,:-]\s*design(er)?\b",  # "Intern, Design"
-]
+# Any internship with "design" or "designer" anywhere in the title counts too (the
+# intern part is checked separately), unless the title names another design field or
+# an engineering/science kind of design, like "Propulsion Design Intern" or
+# "Design for Test Intern". A title with UX or product in it already matches above.
+GENERIC_DESIGN_PATTERNS = [r"\bdesign(ers?)?\b"]
 OTHER_DESIGN_FIELDS = [
     r"graphic", r"industrial", r"interior", r"fashion", r"landscape", r"architectur",
     r"instructional", r"learning", r"packaging", r"lighting", r"textile", r"jewel",
     r"apparel", r"footwear", r"garden", r"kitchen", r"floral", r"print", r"motion",
+    # engineering / science design
+    r"propulsion", r"roadway", r"transportation", r"\btest\b", r"fpga", r"vlsi", r"rtl",
+    r"silicon", r"semiconductor", r"\bpcb\b", r"electronic", r"dram", r"memory",
+    r"protein", r"molecul", r"\bdrug\b", r"automation", r"software", r"analytic",
+    r"analyst", r"technical design", r"process design", r"tool design", r"\bpower\b",
+    r"\bgas\b", r"utility", r"\brf\b", r"antenna", r"optical", r"\bgame\b", r"level design",
 ]
 
 # ...and must NOT match any of these (filters out chip design, "UX Engineer", etc.).
