@@ -43,6 +43,14 @@ OTHER_DESIGN_FIELDS = [
     r"protein", r"molecul", r"\bdrug\b", r"automation", r"software", r"analytic",
     r"analyst", r"technical design", r"process design", r"tool design", r"\bpower\b",
     r"\bgas\b", r"utility", r"\brf\b", r"antenna", r"optical", r"\bgame\b", r"level design",
+    r"system design", r"validation", r"\bqa\b", r"\bcad\b", r"draft", r"technician",
+    r"thermal", r"equipment", r"\bfan\b", r"\br&d\b", r"design (and|&) development",
+    r"computational", r"\baudio\b", r"tech design", r"technology design", r"mission design",
+    # buildings, infrastructure, stores
+    r"build", r"construction", r"virtual design", r"bridge", r"highway", r"airfield",
+    r"aviation", r"regenerative", r"\bstore\b", r"retail", r"merchandis",
+    # course / program design
+    r"training", r"program design", r"curriculum",
 ]
 
 # ...and must NOT match any of these (filters out chip design, "UX Engineer", etc.).
@@ -62,6 +70,7 @@ EXCLUDE_PATTERNS = [
     r"mixed.signal",
     r"programmer",
     r"civil", r"structural", r"\bwater\b", r"electrical",
+    r"talent acquisition", r"recruit",  # e.g. "Talent Acquisition Intern (TikTok-Product and Design)"
 ]
 
 # Excluded too, unless the title also has a clear UX term, so "Hardware UX Design Intern"

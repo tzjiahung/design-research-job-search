@@ -54,7 +54,8 @@ There are two more ways in:
   doesn't count if the title names another design field or an engineering/science kind
   of design (`OTHER_DESIGN_FIELDS`): graphic, industrial, interior, fashion, landscape,
   architecture, instructional, packaging, motion and the like, plus chip, electronics,
-  test, software, protein, game/level and other technical design. If an engineering
+  test, software, protein, game/level, system, CAD, building/construction,
+  highway/bridge, store/retail, audio, training and other technical design. If an engineering
   role still slips through, add the word that gives it away to that list.
 - **Plain "Research Intern"** counts when the job description shows it's UX or user
   research (it mentions user research, UX research, Research & Insights, usability,
