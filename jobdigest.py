@@ -960,9 +960,11 @@ def unwrap_link(url):
 
 def parse_handshake(body):
     """Handshake round-ups and single-job notifications share one card shape:
-    <a><span>company</span><span>title</span><span>meta</span></a>, where meta reads like "$20–30/hr • Internship • Vienna, VA (Hybrid)"."""
+    <a><span>company</span><span>title</span><span>meta</span></a>, where meta reads like "$20–30/hr • Internship • Vienna, VA (Hybrid)".
+    Meta can end with nested spans, e.g. a "• Recently posted" badge, which are dropped."""
     cards = re.findall(r'<a[^>]*href="([^"]+)"[^>]*>\s*<span[^>]*>([^<]*)</span>\s*'
-                       r'<span[^>]*>([^<]*)</span>\s*<span[^>]*>([^<]*)</span>\s*</a>', body)
+                       r'<span[^>]*>([^<]*)</span>\s*<span[^>]*>([^<]*)(?:<span.*?</span>\s*)*</span>\s*</a>',
+                       body, re.S)
     out = []
     for href, company, title, meta in cards:
         company, title, meta = text_of(company), text_of(title), text_of(meta)
@@ -970,7 +972,7 @@ def parse_handshake(body):
         intern = "Internship" in parts or INTERN_RE.search(title)
         if not (intern and is_design_role(title)):
             continue
-        loc = re.sub(r"\s*\((Onsite|Hybrid|Remote)\)|\s*\+\d+$", "", parts[-1]).strip()
+        loc = re.sub(r"\s*\((Onsite|Hybrid|Remote)\)|\s*\+\d+\b", "", parts[-1]).strip()
         if "(Remote)" in parts[-1]:
             loc += " / Remote"
         out.append(job(company, title, unwrap_link(href), [loc], "Handshake", "Not stated"))
