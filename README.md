@@ -9,6 +9,10 @@ once, even when several boards list it.
   Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...), including hardware
   and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, GoPro, Skydio, Figure,
   1X, Agility Robotics, Anduril, Lucid, Zoox, Nuro, Motional, Wayve)
+- Sports, outdoor and fitness brands: Nike, adidas, Under Armour, New Balance, Brooks,
+  On, ASICS, Salomon, HOKA/UGG (Deckers), The North Face/Vans (VF), Columbia, Alo Yoga,
+  Vuori, Gymshark, Fanatics, Bauer, Specialized, Trek, YETI, Academy Sports, plus
+  fitness apps and devices (Strava, Zwift, Tonal, Runna, Ladder, Future)
 - Big-company sites: Google, Meta, Apple, Microsoft, Amazon/AWS, NVIDIA, Adobe, IBM,
   ByteDance/TikTok, Atlassian, Salesforce/Slack, Walmart, Boeing, Nordstrom, Expedia,
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
