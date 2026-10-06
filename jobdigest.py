@@ -684,7 +684,8 @@ def from_foxconn():
 
 
 def from_successfactors(site):
-    """SAP SuccessFactors career sites (TSMC overseas, KPMG Singapore, Deloitte SEA, EY). HTML."""
+    """SAP SuccessFactors career sites (TSMC overseas, KPMG Singapore, Deloitte SEA, EY). HTML.
+    Results come as table rows on most sites and as tiles on some (Under Armour)."""
     base = re.match(r"https://[^/]+", site["search"]).group(0)
     out = {}
     for term in SEARCH_TERMS:
@@ -694,16 +695,18 @@ def from_successfactors(site):
                 params["locationsearch"] = where
             page = fetch(site["search"] + "?" + urllib.parse.urlencode(params),
                          headers={"Accept": "text/html"}).decode("utf-8", "replace")
-            for row in re.findall(r'<tr class="data-row".*?</tr>', page, re.S):
-                link = re.search(r'class="jobTitle-link"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+            for row in re.findall(r'<tr class="data-row".*?</tr>|<li class="job-tile.*?</li>',
+                                  page, re.S):
+                link = re.search(r'class="jobTitle-link[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
                                  row, re.S)
                 if not link:
                     continue
                 title = html.unescape(strip_html(link.group(2))).strip()
                 if not is_design_internship(title):
                     continue
-                loc = re.search(r'class="jobLocation"[^>]*>(.*?)</span>', row, re.S)
-                loc = html.unescape(strip_html(loc.group(1))).strip() if loc else ""
+                loc = re.search(r'class="jobLocation"[^>]*>(.*?)</span>'
+                                r'|-section-location-value">(.*?)</div>', row, re.S)
+                loc = html.unescape(strip_html(loc.group(1) or loc.group(2))).strip() if loc else ""
                 out[link.group(1)] = job(site["company"], title, base + link.group(1),
                                          [loc or site.get("location") or where or ""],
                                          site["company"], "Not stated")

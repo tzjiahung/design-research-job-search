@@ -113,12 +113,17 @@ GREENHOUSE = [
     # hardware / devices / robotics / vehicles
     "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional",
     "goprojobs", "andurilindustries",
+    # sports / outdoor / fitness brands
+    "onrunning", "aloyoga", "gymshark", "vuori", "fanaticsinc", "zwift", "future",
+    "bauerhockeycascademaveriklacrosse",
 ]
 LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning", "zoox"]
 ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "Superhuman Platform Inc", "mobbin.com",
     "whoop", "eightsleep", "skydio", "1x", "wayve", "harvey",
+    # sports / fitness apps
+    "strava", "tonal", "runna", "ladder",
 ]
 # Studios/brands that repost the same job; treated as one company when de-duplicating.
 COMPANY_ALIASES = {
@@ -129,8 +134,10 @@ COMPANY_ALIASES = {
 # Display names for boards whose slug isn't the company name.
 NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mobbin",
          "whoop": "WHOOP", "eightsleep": "Eight Sleep", "1x": "1X", "zoox": "Zoox",
-         "goprojobs": "GoPro", "andurilindustries": "Anduril"}
-SMARTRECRUITERS = ["wise", "servicenow"]
+         "goprojobs": "GoPro", "andurilindustries": "Anduril", "onrunning": "On",
+         "aloyoga": "Alo Yoga", "fanaticsinc": "Fanatics", "future": "Future (fitness coaching)",
+         "bauerhockeycascademaveriklacrosse": "Bauer", "ladder": "Ladder (fitness app)"}
+SMARTRECRUITERS = ["wise", "servicenow", "asics", "salomon"]
 
 # Big-company career sites. "facets" narrows a Workday search (IDs come from the site).
 WORKDAY = [
@@ -181,6 +188,22 @@ WORKDAY = [
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
      "site": "External"},
+    # sports / outdoor brands
+    {"company": "Nike", "host": "nike.wd1.myworkdayjobs.com", "tenant": "nike", "site": "nke"},
+    {"company": "Deckers (HOKA, UGG, Teva)", "host": "deckers.wd5.myworkdayjobs.com",
+     "tenant": "deckers", "site": "deckers"},
+    {"company": "VF (The North Face, Vans, Timberland)", "host": "vfc.wd5.myworkdayjobs.com",
+     "tenant": "vfc", "site": "vfc_careers"},
+    {"company": "Columbia Sportswear", "host": "columbiasportswearcompany.wd5.myworkdayjobs.com",
+     "tenant": "columbiasportswearcompany", "site": "CSC_Careers"},
+    {"company": "Specialized", "host": "specialized.wd5.myworkdayjobs.com", "tenant": "specialized",
+     "site": "specialized_external_career_site"},
+    {"company": "Trek", "host": "trekbikes.wd1.myworkdayjobs.com", "tenant": "trekbikes",
+     "site": "trek"},
+    {"company": "YETI", "host": "yeticoolers.wd5.myworkdayjobs.com", "tenant": "yeticoolers",
+     "site": "yeti"},
+    {"company": "Academy Sports + Outdoors", "host": "academy.wd1.myworkdayjobs.com",
+     "tenant": "academy", "site": "Careers"},
 ]
 ORACLE = [
     {"company": "JPMorgan Chase", "host": "jpmc.fa.oraclecloud.com", "site": "CX_1001"},
@@ -204,6 +227,8 @@ PHENOM = [
     {"company": "Blizzard", "base": "https://careers.blizzard.com"},
     {"company": "BCG", "base": "https://careers.bcg.com", "lang": "en_global",
      "country": "global", "path": "global/en", "id_field": "jobSeqNo"},
+    {"company": "New Balance", "base": "https://jobs.newbalance.com", "lang": "en_global",
+     "country": "global", "path": "global/en"},
 ]
 SUCCESSFACTORS = [
     {"company": "TSMC", "search": "https://ro.careers.tsmc.com/search/"},
@@ -211,6 +236,8 @@ SUCCESSFACTORS = [
     {"company": "Deloitte", "search": "https://jobs.sea.deloitte.com/search/"},
     {"company": "EY", "search": "https://careers.ey.com/ey/search/",
      "locations": ["United States", "Singapore", "Hong Kong", "London"]},
+    {"company": "Under Armour", "search": "https://careers.underarmour.com/search/"},
+    {"company": "adidas", "search": "https://jobs.adidas-group.com/search/"},
 ]
 NEOGOV = [
     {"company": "City of Seattle", "agency": "seattle", "location": "Seattle, WA"},
