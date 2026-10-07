@@ -188,6 +188,8 @@ WORKDAY = [
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
      "site": "External"},
+    {"company": "Trimble", "host": "trimble.wd1.myworkdayjobs.com", "tenant": "trimble",
+     "site": "TrimbleCareers"},
     # sports / outdoor brands
     {"company": "Nike", "host": "nike.wd1.myworkdayjobs.com", "tenant": "nike", "site": "nke"},
     {"company": "Deckers (HOKA, UGG, Teva)", "host": "deckers.wd5.myworkdayjobs.com",
