@@ -138,6 +138,10 @@ NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mob
          "aloyoga": "Alo Yoga", "fanaticsinc": "Fanatics", "future": "Future (fitness coaching)",
          "bauerhockeycascademaveriklacrosse": "Bauer", "ladder": "Ladder (fitness app)"}
 SMARTRECRUITERS = ["wise", "servicenow", "asics", "salomon"]
+# Teamtailor career sites (pages show "teamtailor" in their source); read via <base>/jobs.rss.
+TEAMTAILOR = [
+    {"company": "Treasure AI", "base": "https://jobs.treasure.ai"},
+]
 
 # Big-company career sites. "facets" narrows a Workday search (IDs come from the site).
 WORKDAY = [
