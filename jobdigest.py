@@ -278,6 +278,28 @@ def from_smartrecruiters(slug):
             return out
 
 
+def from_teamtailor(site):
+    import email.utils
+    import xml.etree.ElementTree as ET
+    tt = "{https://teamtailor.com/locations}"
+    root = ET.fromstring(fetch(f"{site['base']}/jobs.rss", headers={"Accept": "application/rss+xml"}))
+    out = []
+    for item in root.iter("item"):
+        title = item.findtext("title") or ""
+        text = strip_html(item.findtext("description"))
+        if not is_design_internship(title, text):
+            continue
+        locs = [", ".join(x for x in (l.findtext(f"{tt}city"), l.findtext(f"{tt}country")) if x)
+                for l in item.iter(f"{tt}location")]
+        if item.findtext("remoteStatus") == "fully":
+            locs.append("Remote")
+        pub = item.findtext("pubDate")
+        posted = email.utils.parsedate_to_datetime(pub).date().isoformat() if pub else None
+        out.append(job(site["company"], title, item.findtext("link"), locs, "Teamtailor",
+                       sponsorship_from_text(text), posted))
+    return out
+
+
 # Big-company career sites don't list everything in one call, so we search them.
 # Their keyword search is loose; is_design_internship() does the real filtering.
 SEARCH_TERMS = ["design intern", "UX intern", "research intern"]
@@ -1160,6 +1182,7 @@ def collect():
     tasks += [(f"lever:{s}", from_lever, s) for s in config.LEVER]
     tasks += [(f"ashby:{s}", from_ashby, s) for s in config.ASHBY]
     tasks += [(f"smartrecruiters:{s}", from_smartrecruiters, s) for s in config.SMARTRECRUITERS]
+    tasks += [(f"teamtailor:{s['company']}", from_teamtailor, s) for s in config.TEAMTAILOR]
     tasks += [(f"workday:{s['company']}", from_workday, s) for s in config.WORKDAY]
     tasks += [(f"oracle:{s['company']}", from_oracle, s) for s in config.ORACLE]
     tasks += [(f"phenom:{s['company']}", from_phenom, s) for s in config.PHENOM]

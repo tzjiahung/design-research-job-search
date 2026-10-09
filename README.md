@@ -5,7 +5,7 @@ UX research internship in the US, Singapore, Hong Kong, London and Taiwan. Each 
 once, even when several boards list it.
 
 **Sources:**
-- ~100 companies' own job boards on Greenhouse, Lever, Ashby and SmartRecruiters (Figma, Airbnb, Stripe,
+- ~100 companies' own job boards on Greenhouse, Lever, Ashby, SmartRecruiters and Teamtailor (Figma, Airbnb, Stripe,
   Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...), including hardware
   and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, GoPro, Skydio, Figure,
   1X, Agility Robotics, Anduril, Lucid, Zoox, Nuro, Motional, Wayve)
