@@ -312,6 +312,13 @@ def from_workday(site):
     # "scan_all" reads every job in the facets instead of searching, for sites whose
     # keyword search matches descriptions and buries design titles past the first pages.
     terms, offsets = ([""], range(0, 1000, 20)) if site.get("scan_all") else (SEARCH_TERMS, (0, 20))
+    # "extra_titles" lets through titles the general filters drop, for this site only.
+    extra_re = re.compile("|".join(site["extra_titles"]), re.I) if site.get("extra_titles") else None
+
+    def wanted(title, text=None):
+        return (is_design_internship(title, text)
+                or bool(extra_re and extra_re.search(title) and INTERN_RE.search(title)))
+
     for term in terms:
         for offset in offsets:
             body = {"appliedFacets": site.get("facets", {}), "limit": 20, "offset": offset,
@@ -319,14 +326,14 @@ def from_workday(site):
             postings = fetch_json(f"{api}/jobs", body).get("jobPostings", [])
             for p in postings:
                 title = p.get("title", "")
-                if is_design_internship(title) or maybe_ux_research(title):
+                if wanted(title) or maybe_ux_research(title):
                     paths[p["externalPath"]] = title
             if len(postings) < 20:
                 break
     out = []
     for path, title in paths.items():
         info = fetch_json(f"{api}{path}").get("jobPostingInfo", {})
-        if not is_design_internship(title, strip_html(info.get("jobDescription"))):
+        if not wanted(title, strip_html(info.get("jobDescription"))):
             continue  # a generic "Research Intern" that isn't UX research
         locs = [info.get("location", "")] + info.get("additionalLocations", [])
         out.append(job(site["company"], title, f"https://{host}/{name}{path}", locs, "Workday",

@@ -194,7 +194,8 @@ WORKDAY = [
      "site": "External"},
     {"company": "Johnson & Johnson", "host": "jj.wd5.myworkdayjobs.com", "tenant": "jj",
      "site": "JJ", "facets": {"jobFamilyGroup": ["604dc786859810010c31cac940da0000"]},
-     "scan_all": True},  # "Career Programs" = internships, co-ops, grad programs
+     "scan_all": True,  # "Career Programs" = internships, co-ops, grad programs
+     "extra_titles": [r"design (and|&) development"]},  # medical device design co-ops
     {"company": "Trimble", "host": "trimble.wd1.myworkdayjobs.com", "tenant": "trimble",
      "site": "TrimbleCareers"},
     # sports / outdoor brands
