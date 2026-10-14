@@ -17,7 +17,7 @@ once, even when several boards list it.
   ByteDance/TikTok, Atlassian, Salesforce/Slack, Walmart, Boeing, Nordstrom, Expedia,
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
   Foxconn, Garmin, Rivian, Snap, Logitech, Sonos, Bose, Dyson, DocuSign, GitHub,
-  MathWorks, ...
+  MathWorks, Johnson & Johnson, ...
 - The SimplifyJobs and Intern Dock internship lists, and Y Combinator startups
 - Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs, LinkedIn), read without changing anything
 

@@ -309,8 +309,11 @@ def from_workday(site):
     host, tenant, name = site["host"], site["tenant"], site["site"]
     api = f"https://{host}/wday/cxs/{tenant}/{name}"
     paths = {}
-    for term in SEARCH_TERMS:
-        for offset in (0, 20):
+    # "scan_all" reads every job in the facets instead of searching, for sites whose
+    # keyword search matches descriptions and buries design titles past the first pages.
+    terms, offsets = ([""], range(0, 1000, 20)) if site.get("scan_all") else (SEARCH_TERMS, (0, 20))
+    for term in terms:
+        for offset in offsets:
             body = {"appliedFacets": site.get("facets", {}), "limit": 20, "offset": offset,
                     "searchText": term}
             postings = fetch_json(f"{api}/jobs", body).get("jobPostings", [])
