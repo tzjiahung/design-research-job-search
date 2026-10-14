@@ -192,6 +192,9 @@ WORKDAY = [
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
      "site": "External"},
+    {"company": "Johnson & Johnson", "host": "jj.wd5.myworkdayjobs.com", "tenant": "jj",
+     "site": "JJ", "facets": {"jobFamilyGroup": ["604dc786859810010c31cac940da0000"]},
+     "scan_all": True},  # "Career Programs" = internships, co-ops, grad programs
     {"company": "Trimble", "host": "trimble.wd1.myworkdayjobs.com", "tenant": "trimble",
      "site": "TrimbleCareers"},
     # sports / outdoor brands
