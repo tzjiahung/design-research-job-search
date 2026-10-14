@@ -109,7 +109,7 @@ GREENHOUSE = [
     "toast", "peloton", "ideo", "sonyinteractiveentertainmentglobal", "xai", "medium",
     "coursera", "pitchbookdata", "samsungresearchamerica", "samsungsemiconductor",
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
-    "thealleninstitute", "stackadapt",
+    "thealleninstitute", "stackadapt", "c3iot",
     # hardware / devices / robotics / vehicles
     "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional",
     "goprojobs", "andurilindustries",
