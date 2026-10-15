@@ -136,8 +136,11 @@ NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mob
          "whoop": "WHOOP", "eightsleep": "Eight Sleep", "1x": "1X", "zoox": "Zoox",
          "goprojobs": "GoPro", "andurilindustries": "Anduril", "onrunning": "On",
          "aloyoga": "Alo Yoga", "fanaticsinc": "Fanatics", "future": "Future (fitness coaching)",
-         "bauerhockeycascademaveriklacrosse": "Bauer", "ladder": "Ladder (fitness app)"}
+         "bauerhockeycascademaveriklacrosse": "Bauer", "ladder": "Ladder (fitness app)",
+         "ajaia": "Ajaia"}
 SMARTRECRUITERS = ["wise", "servicenow", "asics", "salomon"]
+# Workable boards: apply.workable.com/<slug>.
+WORKABLE = ["ajaia"]
 # Teamtailor career sites (pages show "teamtailor" in their source); read via <base>/jobs.rss.
 TEAMTAILOR = [
     {"company": "Treasure AI", "base": "https://jobs.treasure.ai"},

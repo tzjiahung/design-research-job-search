@@ -278,6 +278,25 @@ def from_smartrecruiters(slug):
             return out
 
 
+def from_workable(slug):
+    data = fetch_json(f"https://apply.workable.com/api/v1/widget/accounts/{slug}?details=true")
+    by_code = {}  # the feed repeats a job once per location
+    for j in data.get("jobs", []):
+        loc = ", ".join(x for x in (j.get("city"), j.get("state"), j.get("country")) if x)
+        by_code.setdefault(j["shortcode"], (j, []))[1].append(loc)
+    out = []
+    for j, locs in by_code.values():
+        text = strip_html(j.get("description"))
+        if not is_design_internship(j["title"], text):
+            continue
+        if j.get("telecommuting"):
+            locs.append("Remote")
+        out.append(job(config.NAMES.get(slug, data.get("name") or slug.title()), j["title"],
+                       j["url"], locs, "Workable", sponsorship_from_text(text),
+                       j.get("published_on")))
+    return out
+
+
 def from_teamtailor(site):
     import email.utils
     import xml.etree.ElementTree as ET
@@ -1185,6 +1204,7 @@ def collect():
     tasks += [(f"lever:{s}", from_lever, s) for s in config.LEVER]
     tasks += [(f"ashby:{s}", from_ashby, s) for s in config.ASHBY]
     tasks += [(f"smartrecruiters:{s}", from_smartrecruiters, s) for s in config.SMARTRECRUITERS]
+    tasks += [(f"workable:{s}", from_workable, s) for s in config.WORKABLE]
     tasks += [(f"teamtailor:{s['company']}", from_teamtailor, s) for s in config.TEAMTAILOR]
     tasks += [(f"workday:{s['company']}", from_workday, s) for s in config.WORKDAY]
     tasks += [(f"oracle:{s['company']}", from_oracle, s) for s in config.ORACLE]
