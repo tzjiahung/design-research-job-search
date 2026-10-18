@@ -627,6 +627,35 @@ def from_jibe(site):
             for j in found.values()]
 
 
+def from_eightfold(site):
+    """Careers sites built on Eightfold (Eaton)."""
+    base, domain = site["base"], site["domain"]
+    found = {}
+    for term in SEARCH_TERMS:
+        for start in range(0, 100, 10):  # the API returns at most 10 per page
+            data = fetch_json(f"{base}/api/pcsx/search?" + urllib.parse.urlencode(
+                {"domain": domain, "query": term, "start": start, "num": 10})).get("data", {})
+            positions = data.get("positions", [])
+            for p in positions:
+                if is_design_internship(p["name"]) or maybe_ux_research(p["name"]):
+                    found[p["id"]] = p
+            if len(positions) < 10 or start + 10 >= data.get("count", 0):
+                break
+    out = []
+    for pid, p in found.items():
+        info = fetch_json(f"{base}/api/pcsx/position_details?"
+                          + urllib.parse.urlencode({"position_id": pid, "domain": domain}))
+        text = strip_html(info.get("data", {}).get("jobDescription"))
+        if not is_design_internship(p["name"], text):
+            continue  # a generic "Research Intern" that isn't UX research
+        posted = p.get("postedTs")
+        out.append(job(site["company"], p["name"], f"{base}{p['positionUrl']}",
+                       p.get("locations", []), "Eightfold", sponsorship_from_text(text),
+                       datetime.datetime.fromtimestamp(posted, datetime.timezone.utc)
+                       .date().isoformat() if posted else None))
+    return out
+
+
 def from_snap():
     """Snap's careers site returns every job in one response."""
     data = fetch_json("https://careers.snap.com/api/jobs")
@@ -1227,6 +1256,7 @@ def collect():
     tasks += [(f"moka:{s['company']}", from_moka, s) for s in config.MOKA]
     tasks += [(f"isite:{s['company']}", from_isite, s) for s in config.ISITE]
     tasks += [(f"jibe:{s['company']}", from_jibe, s) for s in config.JIBE]
+    tasks += [(f"eightfold:{s['company']}", from_eightfold, s) for s in config.EIGHTFOLD]
     tasks.append(("simplify", lambda _: from_simplify(), None))
 
     jobs, errors = [], []

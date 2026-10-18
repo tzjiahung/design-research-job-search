@@ -233,6 +233,9 @@ JIBE = [
     {"company": "Rivian", "base": "https://careers.rivian.com",
      "job_url": "https://careers.rivian.com/careers-home/jobs/{req_id}?lang=en-us"},
 ]
+EIGHTFOLD = [
+    {"company": "Eaton", "base": "https://eaton.eightfold.ai", "domain": "eaton.com"},
+]
 PHENOM = [
     {"company": "Honda", "base": "https://careers.honda.com"},
     {"company": "Activision", "base": "https://careers.activision.com"},
