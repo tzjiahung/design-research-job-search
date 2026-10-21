@@ -200,6 +200,10 @@ WORKDAY = [
      "scan_all": True},  # "Career Programs" = internships, co-ops, grad programs
     {"company": "Trimble", "host": "trimble.wd1.myworkdayjobs.com", "tenant": "trimble",
      "site": "TrimbleCareers"},
+    {"company": "Rolls-Royce", "host": "rollsroyce.wd3.myworkdayjobs.com", "tenant": "rollsroyce",
+     "site": "Intern_Graduate"},
+    {"company": "Rolls-Royce", "host": "rollsroyce.wd3.myworkdayjobs.com", "tenant": "rollsroyce",
+     "site": "professional"},
     # sports / outdoor brands
     {"company": "Nike", "host": "nike.wd1.myworkdayjobs.com", "tenant": "nike", "site": "nke"},
     {"company": "Deckers (HOKA, UGG, Teva)", "host": "deckers.wd5.myworkdayjobs.com",
