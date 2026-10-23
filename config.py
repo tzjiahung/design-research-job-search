@@ -111,7 +111,9 @@ GREENHOUSE = [
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
     "thealleninstitute", "stackadapt", "c3iot", "hubspotjobs", "smartsheet",
     # hardware / devices / robotics / vehicles
-    "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional",
+    # Nothing (nothing.tech) removed 2026-10: its Greenhouse board is gone and
+    # careers.nothing.tech shows no jobs. Re-add once it has a working board.
+    "oura", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional",
     "goprojobs", "andurilindustries",
     # sports / outdoor / fitness brands
     "onrunning", "aloyoga", "gymshark", "vuori", "fanaticsinc", "zwift", "future",
