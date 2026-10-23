@@ -2,4 +2,3 @@ digest.html
 __pycache__/
 .DS_Store
 LOGBOOK.md
-.sheet.env

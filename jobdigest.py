@@ -1442,28 +1442,6 @@ def send(subject, body):
         smtp.send_message(msg)
 
 
-# ---------- Google Sheet ----------
-
-def sheet_call(body):
-    """Call the sheet's Apps Script web app (sheet.gs)."""
-    reply = fetch_json(os.environ["SHEET_URL"], dict(body, token=os.environ["SHEET_TOKEN"]))
-    if "error" in reply:
-        raise RuntimeError(reply["error"])
-    return reply
-
-
-def update_sheet(jobs, failed, seen):
-    """Send every open job to the tracker sheet. It adds new rows, refreshes the rest and
-    marks jobs that are gone as closed, skipping jobs whose board failed this run."""
-    today = datetime.date.today().isoformat()
-    rows = [{"key": j["key"], "company": j["company"], "title": j["title"],
-             "url": primary_link(j), "regions": j["regions"], "locations": j["locations"],
-             "sponsorship": j["sponsorship"], "posted": j["posted"] or "",
-             "links": j["links"], "first_seen": seen.get(j["key"], today),
-             "tasks": sorted(j["tasks"])} for j in jobs]
-    return sheet_call({"action": "sync", "jobs": rows, "failed": failed, "today": today})
-
-
 # ---------- main ----------
 
 def main():
@@ -1480,9 +1458,10 @@ def main():
     raw, errors, failed = collect()
     jobs = merge(raw)
     new_jobs = [j for j in jobs if j["key"] not in seen]
-    if os.environ.get("SHEET_URL") and not args.dry_run:
+    if os.environ.get("SHEET_ID") and not args.dry_run:
         try:
-            print("sheet:", update_sheet(jobs, failed, seen))
+            import tracker
+            print("sheet:", tracker.sync(jobs, failed, seen, datetime.date.today().isoformat()))
         except Exception as exc:  # the email still goes out
             errors.append(f"Google Sheet: {exc}")
 

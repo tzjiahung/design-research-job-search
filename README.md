@@ -176,33 +176,26 @@ days (e.g. `60`), for when alerts need catching up.
 
 ## Google Sheet tracker (optional)
 
-Each run also updates a Google Sheet with every open job: the same details as the email,
-plus Status (Open / Closed), Applied on and Notes columns. New jobs are added, the rest are
-refreshed, and a job is marked **Closed** when its listing disappears. If a board can't be
-read in a run, its jobs are left as they are, so an error never closes anything. Jobs
-found only in alert emails can't be checked and stay Open. **Applied on** and **Notes**
-are yours; the digest never changes them. Rows you've applied to turn green, closed ones
-grey.
+Each run also updates a Google Sheet with every open
+job: the same details as the email, plus Status (Open / Closed), Applied on and Notes
+columns. New jobs are added at the top, the rest are refreshed, and a job is marked
+**Closed** when its listing disappears. If a board can't be read in a run, its jobs are left
+as they are, so an error never closes anything. Jobs found only in alert emails can't be
+checked and stay Open. **Applied on** and **Notes** are yours; the digest never writes
+them, and you can sort or filter freely. Rows you've applied to turn green, closed ones grey.
 
-Setup (once):
+Setup (once): the digest signs in as a Google Cloud service account.
 
-1. Open the sheet → Extensions → Apps Script. Replace the editor's contents with
-   [sheet.gs](sheet.gs) and save.
-2. Project Settings (gear) → Script properties → add `TOKEN` with a long random value
-   (e.g. from `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`).
-3. Deploy → New deployment → type **Web app**, execute as **Me**, access **Anyone** →
-   Deploy, approve access, and copy the web app URL. (The token keeps others out.)
-4. Add repo secrets `SHEET_URL` (the web app URL) and `SHEET_TOKEN` (the token).
-5. For marking jobs applied from your computer, put the same two lines in `.sheet.env`
-   (`SHEET_URL=...` and `SHEET_TOKEN=...`; it's git-ignored), then:
+1. In <https://console.cloud.google.com>, create a project, enable the **Google Sheets API**,
+   and create a service account (no roles needed). On its Keys tab: Add key → JSON.
+2. Share the sheet with the service account's email (…@….iam.gserviceaccount.com) as
+   Editor, and set the sheet's General access to **Restricted**.
+3. Add two repo secrets: `SHEET_SA_KEY` (`gh secret set SHEET_SA_KEY < key.json`, then
+   delete the downloaded file) and `SHEET_ID` (the long ID in the sheet's URL, kept out of
+   this public repo).
 
-   ```bash
-   python3 sheet.py find figma product        # look up a job and its key
-   python3 sheet.py applied "<key>" 2026-10-24   # date defaults to today
-   ```
-
-After changing sheet.gs, redeploy with Deploy → Manage deployments → edit → Version: New
-version, which keeps the same URL.
+Without `SHEET_ID` the sheet step is skipped. If it fails, the error is listed at the bottom
+of the email, which still goes out.
 
 ## Preview locally
 
