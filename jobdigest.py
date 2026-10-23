@@ -656,6 +656,34 @@ def from_eightfold(site):
     return out
 
 
+def from_icims(site):
+    """Classic iCIMS job boards (<name>.icims.com), read from their search pages."""
+    base = site["base"]
+    card_re = (r'iCIMS_JobCardItem.*?field-label">Job Locations</span>\s*<span[^>]*>(.*?)</span>'
+               r'.*?<a href="([^"]+/jobs/(\d+)/[^"]+)".*?<h3[^>]*>(.*?)</h3>')
+    found = {}
+    for term in ["intern", "co-op", "design", "UX"]:
+        for page in range(20):
+            rows = html_rows(f"{base}/jobs/search?" + urllib.parse.urlencode(
+                {"ss": 1, "searchKeyword": term, "pr": page, "in_iframe": 1}), card_re)
+            for loc, url, jid, title in rows:
+                title = text_of(title)
+                if is_design_internship(title) or maybe_ux_research(title):
+                    found[jid] = (title, url.replace("?in_iframe=1", ""), text_of(loc))
+            if not rows:
+                break
+    out = []
+    for jid, (title, url, loc) in found.items():
+        page = fetch(url, headers={"Accept": "text/html"}).decode("utf-8", "replace")
+        text = strip_html(page)
+        if not is_design_internship(title, text):
+            continue  # a generic "Research Intern" that isn't UX research
+        posted = re.search(r'"datePosted"\s*:\s*"(\d{4}-\d\d-\d\d)', page)
+        out.append(job(site["company"], title, url, [loc], "iCIMS", sponsorship_from_text(text),
+                       posted and posted.group(1)))
+    return out
+
+
 def from_snap():
     """Snap's careers site returns every job in one response."""
     data = fetch_json("https://careers.snap.com/api/jobs")
@@ -1257,6 +1285,7 @@ def collect():
     tasks += [(f"isite:{s['company']}", from_isite, s) for s in config.ISITE]
     tasks += [(f"jibe:{s['company']}", from_jibe, s) for s in config.JIBE]
     tasks += [(f"eightfold:{s['company']}", from_eightfold, s) for s in config.EIGHTFOLD]
+    tasks += [(f"icims:{s['company']}", from_icims, s) for s in config.ICIMS]
     tasks.append(("simplify", lambda _: from_simplify(), None))
 
     jobs, errors = [], []
