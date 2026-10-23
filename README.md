@@ -7,7 +7,7 @@ once, even when several boards list it.
 **Sources:**
 - ~100 companies' own job boards on Greenhouse, Lever, Ashby, SmartRecruiters, Workable and Teamtailor (Figma, Airbnb, Stripe,
   Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...), including hardware
-  and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, GoPro, Skydio, Figure,
+  and device makers (Oura, WHOOP, Eight Sleep, Peloton, GoPro, Skydio, Figure,
   1X, Agility Robotics, Anduril, Lucid, Zoox, Nuro, Motional, Wayve)
 - Sports, outdoor and fitness brands: Nike, adidas, Under Armour, New Balance, Brooks,
   On, ASICS, Salomon, HOKA/UGG (Deckers), The North Face/Vans (VF), Columbia, Alo Yoga,
@@ -173,6 +173,36 @@ days (e.g. `60`), for when alerts need catching up.
      password. Alerts sent to other inboxes (e.g. a school address) can be auto-forwarded
      there with a Gmail filter.
 4. **Test.** Actions tab → "Daily design internship digest" → Run workflow.
+
+## Google Sheet tracker (optional)
+
+Each run also updates a Google Sheet with every open job: the same details as the email,
+plus Status (Open / Closed), Applied on and Notes columns. New jobs are added, the rest are
+refreshed, and a job is marked **Closed** when its listing disappears. If a board can't be
+read in a run, its jobs are left as they are, so an error never closes anything. Jobs
+found only in alert emails can't be checked and stay Open. **Applied on** and **Notes**
+are yours; the digest never changes them. Rows you've applied to turn green, closed ones
+grey.
+
+Setup (once):
+
+1. Open the sheet → Extensions → Apps Script. Replace the editor's contents with
+   [sheet.gs](sheet.gs) and save.
+2. Project Settings (gear) → Script properties → add `TOKEN` with a long random value
+   (e.g. from `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`).
+3. Deploy → New deployment → type **Web app**, execute as **Me**, access **Anyone** →
+   Deploy, approve access, and copy the web app URL. (The token keeps others out.)
+4. Add repo secrets `SHEET_URL` (the web app URL) and `SHEET_TOKEN` (the token).
+5. For marking jobs applied from your computer, put the same two lines in `.sheet.env`
+   (`SHEET_URL=...` and `SHEET_TOKEN=...`; it's git-ignored), then:
+
+   ```bash
+   python3 sheet.py find figma product        # look up a job and its key
+   python3 sheet.py applied "<key>" 2026-10-24   # date defaults to today
+   ```
+
+After changing sheet.gs, redeploy with Deploy → Manage deployments → edit → Version: New
+version, which keeps the same URL.
 
 ## Preview locally
 

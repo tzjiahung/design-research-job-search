@@ -32,6 +32,8 @@ jobs:
           ALERTS_EMAIL: ${{ secrets.ALERTS_EMAIL }}
           ALERTS_APP_PASSWORD: ${{ secrets.ALERTS_APP_PASSWORD }}
           ALERT_LOOKBACK: ${{ github.event.inputs.alert_lookback }}
+          SHEET_URL: ${{ secrets.SHEET_URL }}
+          SHEET_TOKEN: ${{ secrets.SHEET_TOKEN }}
       - name: Remember what was sent
         run: |
           git config user.name "job-digest-bot"
