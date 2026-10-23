@@ -236,6 +236,11 @@ JIBE = [
 EIGHTFOLD = [
     {"company": "Eaton", "base": "https://eaton.eightfold.ai", "domain": "eaton.com"},
 ]
+# Classic iCIMS boards (links go to <name>.icims.com/jobs/...).
+ICIMS = [
+    {"company": "Cotiviti", "base": "https://careers-cotiviti.icims.com"},
+    {"company": "Cotiviti", "base": "https://globalcareers-cotiviti.icims.com"},
+]
 PHENOM = [
     {"company": "Honda", "base": "https://careers.honda.com"},
     {"company": "Activision", "base": "https://careers.activision.com"},
