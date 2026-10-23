@@ -928,6 +928,15 @@ def from_allen_institute():
             for j in data.get("results", []) if is_design_internship(j.get("positionTitle", ""))]
 
 
+def from_jotform():
+    """Jotform lists its San Francisco openings on its office page (the others are in Turkey)."""
+    rows = html_rows("https://www.jotform.com/about/san-francisco/",
+                     r'<div class="position"><p class="subtext">(.*?)</p><a href="([^"]+)"')
+    return [job("Jotform", text_of(title), html.unescape(url), ["San Francisco, CA"], "Jotform",
+                "Not stated")
+            for title, url in rows if is_design_internship(text_of(title))]
+
+
 def from_accenture():
     out = {}
     countries = [("USA", "us-en"), ("Singapore", "sg-en"), ("Hong Kong", "hk-en"),
@@ -1276,7 +1285,7 @@ def collect():
         ("sound-transit", from_sound_transit), ("allen-institute", from_allen_institute),
         ("accenture", from_accenture), ("mckinsey", from_mckinsey),
         ("email alerts", from_email_alerts), ("interndock", from_interndock),
-        ("snap", from_snap),
+        ("snap", from_snap), ("jotform", from_jotform),
     ]]
     tasks += [(f"successfactors:{s['company']}", from_successfactors, s)
               for s in config.SUCCESSFACTORS]

@@ -109,7 +109,7 @@ GREENHOUSE = [
     "toast", "peloton", "ideo", "sonyinteractiveentertainmentglobal", "xai", "medium",
     "coursera", "pitchbookdata", "samsungresearchamerica", "samsungsemiconductor",
     "gemini", "upstart", "thoughtworks", "hs", "sharpelectronics",
-    "thealleninstitute", "stackadapt", "c3iot", "hubspotjobs",
+    "thealleninstitute", "stackadapt", "c3iot", "hubspotjobs", "smartsheet",
     # hardware / devices / robotics / vehicles
     "oura", "nothing", "figureai", "agilityrobotics", "lucidmotors", "nuro", "motional",
     "goprojobs", "andurilindustries",
@@ -198,6 +198,10 @@ WORKDAY = [
     {"company": "Johnson & Johnson", "host": "jj.wd5.myworkdayjobs.com", "tenant": "jj",
      "site": "JJ", "facets": {"jobFamilyGroup": ["604dc786859810010c31cac940da0000"]},
      "scan_all": True},  # "Career Programs" = internships, co-ops, grad programs
+    {"company": "F5", "host": "ffive.wd5.myworkdayjobs.com", "tenant": "ffive",
+     "site": "f5jobs"},
+    {"company": "Blue Origin", "host": "blueorigin.wd5.myworkdayjobs.com",
+     "tenant": "blueorigin", "site": "BlueOrigin"},
     {"company": "Trimble", "host": "trimble.wd1.myworkdayjobs.com", "tenant": "trimble",
      "site": "TrimbleCareers"},
     {"company": "Rolls-Royce", "host": "rollsroyce.wd3.myworkdayjobs.com", "tenant": "rollsroyce",
