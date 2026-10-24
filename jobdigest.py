@@ -52,7 +52,9 @@ US_RE = re.compile(
     r"boston|chicago|los angeles|austin|san jose|mountain view|palo alto|menlo park|"
     r"sunnyvale|cupertino|redmond|bellevue|kirkland|san diego|san mateo|culver city|"
     r"washington|atlanta|denver|miami|dallas|houston|pittsburgh|philadelphia|"
-    r",\s*(" + "|".join(US_STATES) + r")\b",
+    # "Austin, TX" but not "Gurugram, HR, IN" (India) or "Markham, CA, Canada"
+    r"(?:^|\|)[^,|]*,\s*(" + "|".join(US_STATES) + r")\b"
+    r"(?!\s*,\s*(?!us\b|usa\b|united states)\w)",
     re.I,
 )
 REGION_RES = {
