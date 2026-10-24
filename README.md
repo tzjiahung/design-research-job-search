@@ -181,7 +181,8 @@ job: the same details as the email, plus Status (Open / Closed), Application (a 
 Saved / Applied / Interviewing / Rejected / Offer), Applied on and Notes columns. New jobs are added at the top, the rest are refreshed, and a job is marked
 **Closed** when its listing disappears. If a board can't be read in a run, its jobs are left
 as they are, so an error never closes anything. Jobs found only in alert emails can't be
-checked and stay Open. **Application**, **Applied on** and **Notes** are yours; the digest
+checked and stay Open. A job you set to Closed yourself stays closed, even if the
+listing is still up; the digest only reopens jobs it closed. **Application**, **Applied on** and **Notes** are yours; the digest
 never writes them. Sort, filter, or add and move columns freely: the digest finds its own
 columns by their header names, so don't rename those.
 

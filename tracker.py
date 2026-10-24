@@ -2,7 +2,8 @@
 
 Signs in as a Google Cloud service account (key JSON in SHEET_SA_KEY) that the sheet
 (ID in SHEET_ID, kept secret because this repo is public) is shared with. Each run adds new jobs at the top, refreshes the rest and marks jobs whose
-listing disappeared as Closed. "Application", "Applied on" and "Notes" belong to the user
+listing disappeared as Closed (and reopens them if they come back; a job the user closed
+stays closed). "Application", "Applied on" and "Notes" belong to the user
 and are never written, so rows can be sorted or filtered freely: rows are matched by the
 hidden Key, and columns by their header, so the user can add or move columns too.
 """
@@ -15,7 +16,8 @@ from jobdigest import fetch_json
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 TAB = "Openings"
 HEADERS = ["Status", "Application", "Applied on", "Company", "Title", "Region", "Locations",
-           "Sponsorship", "Posted", "Via", "First seen", "Last seen", "Closed on", "Notes", "Key", "Sources"]
+           "Sponsorship", "Posted", "Via", "First seen", "Last seen", "Closed on", "Notes", "Key", "Sources",
+           "Closed by"]
 COL = {h: i for i, h in enumerate(HEADERS)}  # the layout set_up() creates
 STAGES = ["Saved", "Applied", "Interviewing", "Rejected", "Offer"]  # "Application" dropdown
 # Alert emails just stop mentioning a job, so they can't tell us it closed.
@@ -99,7 +101,7 @@ def set_up(sheet, tabs):
         {"updateSheetProperties": {"properties": {"sheetId": sid,
                                                   "gridProperties": {"frozenRowCount": 1}},
                                    "fields": "gridProperties.frozenRowCount"}},
-        {"updateDimensionProperties": {  # Key and Sources are for the script
+        {"updateDimensionProperties": {  # Key, Sources and Closed by are for the script
             "range": {"sheetId": sid, "dimension": "COLUMNS",
                       "startIndex": COL["Key"], "endIndex": len(HEADERS)},
             "properties": {"hiddenByUser": True}, "fields": "hiddenByUser"}},
@@ -145,7 +147,7 @@ def sync(jobs, failed, seen, today):
                                                    "startIndex": 1, "endIndex": 1 + shift}}})
 
     def cells(j, first_seen):
-        return {col["Status"]: text("Open"), col["Company"]: text(j["company"]),
+        return {col["Status"]: text("Open"), col["Closed by"]: text(""), col["Company"]: text(j["company"]),
                 col["Title"]: text(j["title"], primary_link(j)),
                 col["Region"]: text(", ".join(j["regions"])),
                 col["Locations"]: text("; ".join(j["locations"])),
@@ -162,8 +164,14 @@ def sync(jobs, failed, seen, today):
     for j in jobs:
         if j["key"] in where:
             row = rows[where[j["key"]] - 1]
-            reopened += row[col["Status"]] == "Closed"
-            reqs += write(sid, where[j["key"]] + shift, cells(j, row[col["First seen"]]))
+            update = cells(j, row[col["First seen"]])
+            if row[col["Status"]] != "Open":
+                if row[col["Closed by"]] == "digest":
+                    reopened += 1
+                else:  # the user closed it; leave that be
+                    for h in ("Status", "Closed on", "Closed by"):
+                        del update[col[h]]
+            reqs += write(sid, where[j["key"]] + shift, update)
     failed = set(failed)
     for key, i in where.items():
         row = rows[i - 1]
@@ -173,7 +181,8 @@ def sync(jobs, failed, seen, today):
         if tasks & failed or tasks <= UNCHECKABLE:
             continue
         reqs += write(sid, i + shift, {col["Status"]: text("Closed"),
-                                       col["Closed on"]: text(today)})
+                                       col["Closed on"]: text(today),
+                                       col["Closed by"]: text("digest")})
         closed += 1
     sheet.update(reqs)
     return {"added": len(new), "reopened": reopened, "closed": closed}
