@@ -183,7 +183,7 @@ Saved / Applied / Interviewing / Rejected / Offer), Applied on and Notes columns
 as they are, so an error never closes anything. Jobs found only in alert emails can't be
 checked and stay Open. **Application**, **Applied on** and **Notes** are yours; the digest
 never writes them. Sort, filter, or add and move columns freely: the digest finds its own
-columns by their header names, so don't rename those. Rows you've applied to turn green, closed ones grey.
+columns by their header names, so don't rename those. Closed rows turn grey.
 
 Setup (once): the digest signs in as a Google Cloud service account.
 

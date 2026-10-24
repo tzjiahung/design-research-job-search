@@ -113,11 +113,8 @@ def set_up(sheet, tabs):
             "range": {"sheetId": sid, "dimension": "COLUMNS",
                       "startIndex": COL["Key"], "endIndex": len(HEADERS)},
             "properties": {"hiddenByUser": True}, "fields": "hiddenByUser"}},
-        # Added at index 0 in turn, so "applied" ends up first and wins over "closed".
         rule('=$A2="Closed"', {"textFormat": {"foregroundColor":
                                               {"red": .6, "green": .63, "blue": .65}}}),
-        rule(f'=${chr(65 + COL["Applied on"])}2<>""',
-             {"backgroundColor": {"red": .9, "green": .96, "blue": .92}}),
         {"setDataValidation": {
             "range": {"sheetId": sid, "startRowIndex": 1, "startColumnIndex": COL["Application"],
                       "endColumnIndex": COL["Application"] + 1},
