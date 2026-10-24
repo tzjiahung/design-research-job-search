@@ -90,16 +90,6 @@ def set_up(sheet, tabs):
     else:
         sid = max(t["properties"]["sheetId"] for t in tabs) + 1
         reqs = [{"addSheet": {"properties": {"sheetId": sid, "title": TAB, "index": 0}}}]
-    every_row = {"sheetId": sid, "startRowIndex": 1, "startColumnIndex": 0,
-                 "endColumnIndex": len(HEADERS)}
-
-    def rule(formula, fmt):
-        return {"addConditionalFormatRule": {"index": 0, "rule": {
-            "ranges": [every_row],
-            "booleanRule": {"condition": {"type": "CUSTOM_FORMULA",
-                                          "values": [{"userEnteredValue": formula}]},
-                            "format": fmt}}}}
-
     reqs += [
         {"updateCells": {"start": {"sheetId": sid, "rowIndex": 0, "columnIndex": 0},
                          "rows": [{"values": [
@@ -113,8 +103,6 @@ def set_up(sheet, tabs):
             "range": {"sheetId": sid, "dimension": "COLUMNS",
                       "startIndex": COL["Key"], "endIndex": len(HEADERS)},
             "properties": {"hiddenByUser": True}, "fields": "hiddenByUser"}},
-        rule('=$A2="Closed"', {"textFormat": {"foregroundColor":
-                                              {"red": .6, "green": .63, "blue": .65}}}),
         {"setDataValidation": {
             "range": {"sheetId": sid, "startRowIndex": 1, "startColumnIndex": COL["Application"],
                       "endColumnIndex": COL["Application"] + 1},
