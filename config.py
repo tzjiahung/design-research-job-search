@@ -291,3 +291,48 @@ SIMPLIFY_URL = (
     "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/"
     "dev/.github/scripts/listings.json"
 )
+
+# Industry shown in the Google Sheet tracker. Names are matched ignoring case, a trailing
+# "Inc."/"Corporation"/"LLC"/"USA" and anything in parentheses; unlisted companies are left
+# blank there (fill them in by hand, or add them here).
+INDUSTRIES = {
+    "Tech & Software": [
+        "1Password", "Adobe", "Atlassian", "Colibri Group", "Databricks", "DemaDose", "Dice",
+        "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta", "Microsoft",
+        "Nominal", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest", "Salesforce",
+        "SeatGeek", "TikTok", "Tractian", "Veeam Software", "Workiva", "Workshop", "Zillow",
+        "ZOVU",
+    ],
+    "Finance & Fintech": [
+        "Axos Bank", "Coinbase", "Gemini", "Goldman Sachs", "IBKR", "ICE", "Intuit", "Niural",
+        "Rocket Companies",
+    ],
+    "Insurance": [
+        "Auto-Owners Insurance", "CNA Insurance", "National Life Insurance Company",
+        "State Farm", "Western National Insurance",
+    ],
+    "Automotive & Mobility": ["General Motors", "Honda", "Rivian", "Subaru", "Waymo"],
+    "Aerospace & Defense": ["Anduril", "Gulfstream Aerospace", "Rolls-Royce"],
+    "Hardware & Electronics": ["Garmin", "HP", "Matic", "NVIDIA", "Vertiv"],
+    "Manufacturing & Industrial": [
+        "3M", "Allegion", "Crown Equipment", "Elkay Manufacturing", "Grainger",
+        "Hubbell Incorporated", "James Hardie", "Keen Project Solutions", "Oshkosh",
+    ],
+    "Retail & Consumer Goods": [
+        "Cityfurnish", "Do it Best", "Hy-Vee", "Love's Travel Stops & Country Stores", "Mars",
+        "Meijer", "Pilot Company", "Procter & Gamble", "Target", "The Home Depot", "Uline",
+    ],
+    "Games, Media & Entertainment": [
+        "Activision", "Aviagames", "CHAO.S PR", "Dow Jones", "Nintendo", "Roblox",
+    ],
+    "Healthcare & Medical": ["Philips", "Stryker"],
+    "Energy & Utilities": ["American Electric Power", "Duke Energy"],
+    "Airlines & Travel": ["Delta Air Lines", "Southwest Airlines", "United Airlines"],
+    "Consulting & Services": [
+        "Accenture", "Athena Global Advisors", "Bound", "Gallup", "KPMG",
+        "Morgan Philips Group", "UDig", "World Wide Technology",
+    ],
+    "Government & Nonprofit": [
+        "Answers in Genesis Group", "Dynamic Catholic", "Idaho National Laboratory",
+    ],
+}

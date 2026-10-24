@@ -178,7 +178,8 @@ days (e.g. `60`), for when alerts need catching up.
 
 Each run also updates a Google Sheet with every open
 job: the same details as the email, plus Status (Open / Closed), Application (a dropdown:
-Saved / Applied / Interviewing / Rejected / Offer), Applied on and Notes columns. New jobs are added at the top, the rest are refreshed, and a job is marked
+Saved / Applied / Interviewing / Rejected / Offer), Applied on and Notes columns. Industry comes from
+`INDUSTRIES` in `config.py`; companies not listed there are left blank for you to fill in. New jobs are added at the top, the rest are refreshed, and a job is marked
 **Closed** when its listing disappears. If a board can't be read in a run, its jobs are left
 as they are, so an error never closes anything. Jobs found only in alert emails can't be
 checked and stay Open. A job you set to Closed yourself stays closed, even if the
