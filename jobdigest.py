@@ -1297,15 +1297,16 @@ def collect():
     tasks += [(f"icims:{s['company']}", from_icims, s) for s in config.ICIMS]
     tasks.append(("simplify", lambda _: from_simplify(), None))
 
-    jobs, errors = [], []
+    jobs, errors, failed = [], [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
         futures = {pool.submit(fn, arg): name for name, fn, arg in tasks}
         for fut in concurrent.futures.as_completed(futures):
             try:
-                jobs.extend(fut.result())
+                jobs.extend(dict(j, task=futures[fut]) for j in fut.result())
             except Exception as exc:  # one broken board shouldn't kill the digest
                 errors.append(f"{futures[fut]}: {exc}")
-    return jobs, errors
+                failed.append(futures[fut])
+    return jobs, errors, failed
 
 
 # ---------- de-duplication ----------
@@ -1327,8 +1328,10 @@ def merge(jobs):
             continue
         company = norm(j["company"])
         key = f"{config.COMPANY_ALIASES.get(company, company)}|{norm(j['title'])}"
-        m = merged.setdefault(key, dict(j, key=key, regions=regions, links={}, received={}))
+        m = merged.setdefault(key, dict(j, key=key, regions=regions, links={}, received={},
+                                        tasks=set()))
         m["links"].setdefault(j["source"], j["url"])
+        m["tasks"].add(j["task"])
         if j.get("received"):  # earliest alert email per source
             prev = m["received"].get(j["source"])
             m["received"][j["source"]] = min(prev, j["received"]) if prev else j["received"]
@@ -1369,6 +1372,12 @@ def when(j):
     return ""
 
 
+def primary_link(j):
+    """The company's own page rather than an alert email's link, when there is one."""
+    return next((u for src, u in j["links"].items() if src not in ALERT_SOURCES),
+                next(iter(j["links"].values())))
+
+
 def render(new_jobs, total_open, first_run, errors):
     today = datetime.date.today().strftime("%a %b %d, %Y")
     intro = (
@@ -1394,9 +1403,7 @@ def render(new_jobs, total_open, first_run, errors):
             continue
         parts.append(f'<h3 style="margin:24px 0 8px">{region} ({len(rows)})</h3>')
         for j in rows:
-            # Prefer the company's own page over an alert email's link.
-            primary = next((u for src, u in j["links"].items() if src not in ALERT_SOURCES),
-                           next(iter(j["links"].values())))
+            primary = primary_link(j)
             others = " · ".join(
                 f'<a href="{html.escape(u)}" style="color:#5f6368">{html.escape(s)}</a>'
                 for s, u in j["links"].items()
@@ -1448,9 +1455,15 @@ def main():
     first_run = not seen
     if first_run and not os.environ.get("ALERT_LOOKBACK"):
         ALERT_LOOKBACK = "60d"  # include every alert already in the inbox
-    raw, errors = collect()
+    raw, errors, failed = collect()
     jobs = merge(raw)
     new_jobs = [j for j in jobs if j["key"] not in seen]
+    if os.environ.get("SHEET_ID") and not args.dry_run:
+        try:
+            import tracker
+            print("sheet:", tracker.sync(jobs, failed, seen, datetime.date.today().isoformat()))
+        except Exception as exc:  # the email still goes out
+            errors.append(f"Google Sheet: {exc}")
 
     body = render(new_jobs, len(jobs), first_run, errors)
     n = len(new_jobs)

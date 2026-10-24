@@ -7,7 +7,7 @@ once, even when several boards list it.
 **Sources:**
 - ~100 companies' own job boards on Greenhouse, Lever, Ashby, SmartRecruiters, Workable and Teamtailor (Figma, Airbnb, Stripe,
   Notion, Coinbase, Roblox, Pinterest, Duolingo, Wise, ServiceNow, ...), including hardware
-  and device makers (Oura, WHOOP, Eight Sleep, Nothing, Peloton, GoPro, Skydio, Figure,
+  and device makers (Oura, WHOOP, Eight Sleep, Peloton, GoPro, Skydio, Figure,
   1X, Agility Robotics, Anduril, Lucid, Zoox, Nuro, Motional, Wayve)
 - Sports, outdoor and fitness brands: Nike, adidas, Under Armour, New Balance, Brooks,
   On, ASICS, Salomon, HOKA/UGG (Deckers), The North Face/Vans (VF), Columbia, Alo Yoga,
@@ -173,6 +173,29 @@ days (e.g. `60`), for when alerts need catching up.
      password. Alerts sent to other inboxes (e.g. a school address) can be auto-forwarded
      there with a Gmail filter.
 4. **Test.** Actions tab → "Daily design internship digest" → Run workflow.
+
+## Google Sheet tracker (optional)
+
+Each run also updates a Google Sheet with every open
+job: the same details as the email, plus Status (Open / Closed), Applied on and Notes
+columns. New jobs are added at the top, the rest are refreshed, and a job is marked
+**Closed** when its listing disappears. If a board can't be read in a run, its jobs are left
+as they are, so an error never closes anything. Jobs found only in alert emails can't be
+checked and stay Open. **Applied on** and **Notes** are yours; the digest never writes
+them, and you can sort or filter freely. Rows you've applied to turn green, closed ones grey.
+
+Setup (once): the digest signs in as a Google Cloud service account.
+
+1. In <https://console.cloud.google.com>, create a project, enable the **Google Sheets API**,
+   and create a service account (no roles needed). On its Keys tab: Add key → JSON.
+2. Share the sheet with the service account's email (…@….iam.gserviceaccount.com) as
+   Editor, and set the sheet's General access to **Restricted**.
+3. Add two repo secrets: `SHEET_SA_KEY` (`gh secret set SHEET_SA_KEY < key.json`, then
+   delete the downloaded file) and `SHEET_ID` (the long ID in the sheet's URL, kept out of
+   this public repo).
+
+Without `SHEET_ID` the sheet step is skipped. If it fails, the error is listed at the bottom
+of the email, which still goes out.
 
 ## Preview locally
 
