@@ -9,13 +9,16 @@ hidden Key, and columns by their header, so the user can add or move columns too
 """
 import json
 import os
+import re
 import urllib.parse
+
+import config
 
 from jobdigest import fetch_json
 
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 TAB = "Openings"
-HEADERS = ["Status", "Application", "Applied on", "Company", "Title", "Region", "Locations",
+HEADERS = ["Status", "Application", "Applied on", "Company", "Industry", "Title", "Region", "Locations",
            "Sponsorship", "Posted", "Via", "First seen", "Last seen", "Closed on", "Notes", "Key", "Sources",
            "Closed by"]
 COL = {h: i for i, h in enumerate(HEADERS)}  # the layout set_up() creates
@@ -23,6 +26,16 @@ STAGES = ["Saved", "Applied", "Interviewing", "Rejected", "Offer"]  # "Applicati
 # Alert emails just stop mentioning a job, so they can't tell us it closed.
 UNCHECKABLE = {"email alerts"}
 USER_OWNED = {"Application", "Applied on", "Notes"}
+
+
+def plain_name(company):
+    """"Hubbell Incorporated", "Cityfurnish (YC W19)" -> "hubbell", "cityfurnish"."""
+    name = re.sub(r"\(.*?\)", "", company).lower()
+    name = re.sub(r"[,.]?\s+(inc|incorporated|corp|corporation|llc|co|usa)\.?$", "", name.strip())
+    return name.strip(" ,.")
+
+
+INDUSTRY = {plain_name(c): ind for ind, cos in config.INDUSTRIES.items() for c in cos}
 
 
 def token():
@@ -155,7 +168,9 @@ def sync(jobs, failed, seen, today):
                 col["Posted"]: text(j["posted"] or ""), col["Via"]: links(j["links"]),
                 col["First seen"]: text(first_seen), col["Last seen"]: text(today),
                 col["Closed on"]: text(""), col["Key"]: text(j["key"]),
-                col["Sources"]: text(", ".join(sorted(j["tasks"])))}
+                col["Sources"]: text(", ".join(sorted(j["tasks"]))),
+                **({col["Industry"]: text(INDUSTRY[plain_name(j["company"])])}
+                   if plain_name(j["company"]) in INDUSTRY else {})}
 
     for i, j in enumerate(new):
         reqs += write(sid, 1 + i, cells(j, seen.get(j["key"], today)))
