@@ -2,8 +2,9 @@
 
 Signs in as a Google Cloud service account (key JSON in SHEET_SA_KEY) that the sheet
 (ID in SHEET_ID, kept secret because this repo is public) is shared with. Each run adds new jobs at the top, refreshes the rest and marks jobs whose
-listing disappeared as Closed. "Applied on" and "Notes" belong to the user and are never
-written, so rows can be sorted or filtered freely: rows are matched by the hidden Key.
+listing disappeared as Closed. "Application", "Applied on" and "Notes" belong to the user
+and are never written, so rows can be sorted or filtered freely: rows are matched by the
+hidden Key, and columns by their header, so the user can add or move columns too.
 """
 import json
 import os
@@ -13,11 +14,13 @@ from jobdigest import fetch_json
 
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 TAB = "Openings"
-HEADERS = ["Status", "Applied on", "Company", "Title", "Region", "Locations", "Sponsorship",
-           "Posted", "Via", "First seen", "Last seen", "Closed on", "Notes", "Key", "Sources"]
-COL = {h: i for i, h in enumerate(HEADERS)}
+HEADERS = ["Status", "Application", "Applied on", "Company", "Title", "Region", "Locations",
+           "Sponsorship", "Posted", "Via", "First seen", "Last seen", "Closed on", "Notes", "Key", "Sources"]
+COL = {h: i for i, h in enumerate(HEADERS)}  # the layout set_up() creates
+STAGES = ["Saved", "Applied", "Interviewing", "Rejected", "Offer"]  # "Application" dropdown
 # Alert emails just stop mentioning a job, so they can't tell us it closed.
 UNCHECKABLE = {"email alerts"}
+USER_OWNED = {"Application", "Applied on", "Notes"}
 
 
 def token():
@@ -79,7 +82,7 @@ def write(sheet_id, row, cells):
 def set_up(sheet, tabs):
     """Turn the first tab (or a new one) into the Openings tab, once."""
     first = tabs[0]["properties"]
-    empty = not sheet.get(f"/values/{urllib.parse.quote(first['title'])}!A1:O2").get("values")
+    empty = not sheet.get(f"/values/{urllib.parse.quote(first['title'])}!A1:Z2").get("values")
     if empty:
         sid = first["sheetId"]
         reqs = [{"updateSheetProperties": {"properties": {"sheetId": sid, "title": TAB},
@@ -113,7 +116,14 @@ def set_up(sheet, tabs):
         # Added at index 0 in turn, so "applied" ends up first and wins over "closed".
         rule('=$A2="Closed"', {"textFormat": {"foregroundColor":
                                               {"red": .6, "green": .63, "blue": .65}}}),
-        rule('=$B2<>""', {"backgroundColor": {"red": .9, "green": .96, "blue": .92}}),
+        rule(f'=${chr(65 + COL["Applied on"])}2<>""',
+             {"backgroundColor": {"red": .9, "green": .96, "blue": .92}}),
+        {"setDataValidation": {
+            "range": {"sheetId": sid, "startRowIndex": 1, "startColumnIndex": COL["Application"],
+                      "endColumnIndex": COL["Application"] + 1},
+            "rule": {"condition": {"type": "ONE_OF_LIST",
+                                   "values": [{"userEnteredValue": v} for v in STAGES]},
+                     "showCustomUi": True}}},
         {"setBasicFilter": {"filter": {"range": {"sheetId": sid, "startRowIndex": 0,
                                                  "startColumnIndex": 0,
                                                  "endColumnIndex": len(HEADERS)}}}},
@@ -132,9 +142,13 @@ def sync(jobs, failed, seen, today):
                None)
     if sid is None:
         sid = set_up(sheet, tabs)
-    rows = sheet.get(f"/values/{TAB}!A2:O").get("values", [])
-    rows = [r + [""] * (len(HEADERS) - len(r)) for r in rows]
-    where = {r[COL["Key"]]: i + 1 for i, r in enumerate(rows) if r[COL["Key"]]}
+    header, *rows = sheet.get(f"/values/{TAB}").get("values", [[]])
+    missing = [h for h in HEADERS if h not in header and h not in USER_OWNED]
+    if missing:
+        raise RuntimeError(f"sheet is missing columns: {', '.join(missing)}")
+    col = {h: i for i, h in enumerate(header)}
+    rows = [r + [""] * (len(header) - len(r)) for r in rows]
+    where = {r[col["Key"]]: i + 1 for i, r in enumerate(rows) if r[col["Key"]]}
 
     new = [j for j in jobs if j["key"] not in where]
     newest = lambda j: j["posted"] or seen.get(j["key"], today)
@@ -146,15 +160,15 @@ def sync(jobs, failed, seen, today):
                                                    "startIndex": 1, "endIndex": 1 + shift}}})
 
     def cells(j, first_seen):
-        return {COL["Status"]: text("Open"), COL["Company"]: text(j["company"]),
-                COL["Title"]: text(j["title"], primary_link(j)),
-                COL["Region"]: text(", ".join(j["regions"])),
-                COL["Locations"]: text("; ".join(j["locations"])),
-                COL["Sponsorship"]: text(j["sponsorship"]),
-                COL["Posted"]: text(j["posted"] or ""), COL["Via"]: links(j["links"]),
-                COL["First seen"]: text(first_seen), COL["Last seen"]: text(today),
-                COL["Closed on"]: text(""), COL["Key"]: text(j["key"]),
-                COL["Sources"]: text(", ".join(sorted(j["tasks"])))}
+        return {col["Status"]: text("Open"), col["Company"]: text(j["company"]),
+                col["Title"]: text(j["title"], primary_link(j)),
+                col["Region"]: text(", ".join(j["regions"])),
+                col["Locations"]: text("; ".join(j["locations"])),
+                col["Sponsorship"]: text(j["sponsorship"]),
+                col["Posted"]: text(j["posted"] or ""), col["Via"]: links(j["links"]),
+                col["First seen"]: text(first_seen), col["Last seen"]: text(today),
+                col["Closed on"]: text(""), col["Key"]: text(j["key"]),
+                col["Sources"]: text(", ".join(sorted(j["tasks"])))}
 
     for i, j in enumerate(new):
         reqs += write(sid, 1 + i, cells(j, seen.get(j["key"], today)))
@@ -163,18 +177,18 @@ def sync(jobs, failed, seen, today):
     for j in jobs:
         if j["key"] in where:
             row = rows[where[j["key"]] - 1]
-            reopened += row[COL["Status"]] == "Closed"
-            reqs += write(sid, where[j["key"]] + shift, cells(j, row[COL["First seen"]]))
+            reopened += row[col["Status"]] == "Closed"
+            reqs += write(sid, where[j["key"]] + shift, cells(j, row[col["First seen"]]))
     failed = set(failed)
     for key, i in where.items():
         row = rows[i - 1]
-        if key in open_keys or row[COL["Status"]] != "Open":
+        if key in open_keys or row[col["Status"]] != "Open":
             continue
-        tasks = set(filter(None, row[COL["Sources"]].split(", ")))
+        tasks = set(filter(None, row[col["Sources"]].split(", ")))
         if tasks & failed or tasks <= UNCHECKABLE:
             continue
-        reqs += write(sid, i + shift, {COL["Status"]: text("Closed"),
-                                       COL["Closed on"]: text(today)})
+        reqs += write(sid, i + shift, {col["Status"]: text("Closed"),
+                                       col["Closed on"]: text(today)})
         closed += 1
     sheet.update(reqs)
     return {"added": len(new), "reopened": reopened, "closed": closed}
