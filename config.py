@@ -317,6 +317,7 @@ INDUSTRIES = {
     "Manufacturing & Industrial": [
         "3M", "Allegion", "Crown Equipment", "Elkay Manufacturing", "Grainger",
         "Hubbell Incorporated", "James Hardie", "Keen Project Solutions", "Oshkosh",
+        "Stanley Black & Decker",
     ],
     "Retail & Consumer Goods": [
         "Cityfurnish", "Do it Best", "Hy-Vee", "Love's Travel Stops & Country Stores", "Mars",
@@ -330,7 +331,7 @@ INDUSTRIES = {
     "Airlines & Travel": ["Delta Air Lines", "Southwest Airlines", "United Airlines"],
     "Consulting & Services": [
         "Accenture", "Athena Global Advisors", "Bound", "Gallup", "KPMG",
-        "Morgan Philips Group", "UDig", "World Wide Technology",
+        "Morgan Philips Group", "Reingold", "UDig", "World Wide Technology",
     ],
     "Government & Nonprofit": [
         "Answers in Genesis Group", "Dynamic Catholic", "Idaho National Laboratory",
