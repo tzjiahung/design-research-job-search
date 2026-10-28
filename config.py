@@ -299,9 +299,9 @@ INDUSTRIES = {
     "Tech & Software": [
         "1Password", "Adobe", "Atlassian", "Colibri Group", "Databricks", "DemaDose", "Dice",
         "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta", "Microsoft",
-        "Nominal", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest", "Salesforce",
-        "SeatGeek", "TikTok", "Tractian", "Veeam Software", "Workiva", "Workshop", "Zillow",
-        "ZOVU",
+        "Nominal", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest", "Read AI",
+        "Salesforce", "SeatGeek", "TikTok", "Tractian", "Veeam Software", "Workiva", "Workshop",
+        "Zillow", "ZOVU",
     ],
     "Finance & Fintech": [
         "Axos Bank", "Coinbase", "Gemini", "Goldman Sachs", "IBKR", "ICE", "Intuit", "Niural",
