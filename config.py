@@ -300,8 +300,8 @@ INDUSTRIES = {
         "1Password", "Adobe", "Atlassian", "Colibri Group", "Databricks", "DemaDose", "Dice",
         "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta", "Microsoft",
         "MongoDB", "Nominal", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest",
-        "Read AI", "Red Hat", "Reddit", "Salesforce", "SeatGeek", "TikTok", "Tractian",
-        "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
+        "Read AI", "Red Hat", "Reddit", "Salesforce", "SeatGeek", "Superhuman", "TikTok",
+        "Tractian", "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
     ],
     "Finance & Fintech": [
         "Axos Bank", "Coinbase", "Gemini", "Goldman Sachs", "IBKR", "ICE", "Intuit", "Niural",
@@ -326,7 +326,7 @@ INDUSTRIES = {
     ],
     "Games, Media & Entertainment": [
         "Activision", "Aviagames", "CHAO.S PR", "Dow Jones", "Nintendo", "Roblox",
-        "The New York Times",
+        "The New York Times", "Twitch",
     ],
     "Healthcare & Medical": ["Philips", "Stryker"],
     "Energy & Utilities": ["American Electric Power", "Duke Energy"],
