@@ -300,9 +300,9 @@ INDUSTRIES = {
         "1Password", "Adobe", "Anthropic", "Atlassian", "Colibri Group", "Databricks",
         "DemaDose", "Dice", "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta",
         "Microsoft", "MongoDB", "Nominal", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir",
-        "Patreon", "Pinterest", "Read AI", "Red Hat", "Reddit", "Salesforce", "SeatGeek",
-        "Slack", "Superhuman", "The Browser Company", "TikTok", "Tractian", "Tumblr",
-        "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
+        "Patreon", "Pinterest", "Quip", "Read AI", "Red Hat", "Reddit", "Salesforce",
+        "SeatGeek", "Slack", "Superhuman", "The Browser Company", "TikTok", "Tractian",
+        "Tumblr", "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
     ],
     "Finance & Fintech": [
         "Axos Bank", "Coinbase", "Gemini", "Goldman Sachs", "IBKR", "ICE", "Intuit", "Niural",
@@ -323,7 +323,7 @@ INDUSTRIES = {
     "Retail & Consumer Goods": [
         "Cityfurnish", "Do it Best", "Hy-Vee", "Keurig", "Keurig Dr Pepper",
         "Love's Travel Stops & Country Stores", "Mars", "Meijer", "Pilot Company",
-        "Procter & Gamble", "Quip", "Target", "The Home Depot", "Uline",
+        "Procter & Gamble", "Target", "The Home Depot", "Uline",
     ],
     "Games, Media & Entertainment": [
         "Activision", "Aviagames", "CHAO.S PR", "Dow Jones", "Nintendo", "Roblox",
