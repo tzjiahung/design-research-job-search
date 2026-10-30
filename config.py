@@ -323,7 +323,7 @@ INDUSTRIES = {
     "Retail & Consumer Goods": [
         "Cityfurnish", "Do it Best", "Hy-Vee", "Keurig", "Keurig Dr Pepper",
         "Love's Travel Stops & Country Stores", "Mars", "Meijer", "Pilot Company",
-        "Procter & Gamble", "Target", "The Home Depot", "Uline",
+        "Procter & Gamble", "Quip", "Target", "The Home Depot", "Uline",
     ],
     "Games, Media & Entertainment": [
         "Activision", "Aviagames", "CHAO.S PR", "Dow Jones", "Nintendo", "Roblox",
