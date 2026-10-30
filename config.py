@@ -297,11 +297,12 @@ SIMPLIFY_URL = (
 # blank there (fill them in by hand, or add them here).
 INDUSTRIES = {
     "Tech & Software": [
-        "1Password", "Adobe", "Atlassian", "Colibri Group", "Databricks", "DemaDose", "Dice",
-        "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta", "Microsoft",
-        "MongoDB", "Nominal", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest",
-        "Read AI", "Red Hat", "Reddit", "Salesforce", "SeatGeek", "Superhuman", "TikTok",
-        "Tractian", "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
+        "1Password", "Adobe", "Anthropic", "Atlassian", "Colibri Group", "Databricks",
+        "DemaDose", "Dice", "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta",
+        "Microsoft", "MongoDB", "Nominal", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir",
+        "Patreon", "Pinterest", "Quip", "Read AI", "Red Hat", "Reddit", "Salesforce",
+        "SeatGeek", "Slack", "Superhuman", "The Browser Company", "TikTok", "Tractian",
+        "Tumblr", "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
     ],
     "Finance & Fintech": [
         "Axos Bank", "Coinbase", "Gemini", "Goldman Sachs", "IBKR", "ICE", "Intuit", "Niural",
