@@ -71,6 +71,7 @@ EXCLUDE_PATTERNS = [
     r"programmer",
     r"civil", r"structural", r"\bwater\b", r"electrical",
     r"talent acquisition", r"recruit",  # e.g. "Talent Acquisition Intern (TikTok-Product and Design)"
+    r"product manag",  # e.g. "Product Management Intern, End User Experience"
 ]
 
 # Excluded too, unless the title also has a clear UX term, so "Hardware UX Design Intern"
