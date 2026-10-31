@@ -37,6 +37,7 @@ OTHER_DESIGN_FIELDS = [
     r"graphic", r"industrial", r"interior", r"fashion", r"landscape", r"architectur",
     r"instructional", r"learning", r"packaging", r"lighting", r"textile", r"jewel",
     r"apparel", r"footwear", r"garden", r"kitchen", r"floral", r"print", r"motion",
+    r"editorial",
     # engineering / science design
     r"propulsion", r"roadway", r"transportation", r"\btest\b", r"fpga", r"vlsi", r"rtl",
     r"silicon", r"semiconductor", r"\bpcb\b", r"electronic", r"dram", r"memory",
