@@ -199,6 +199,8 @@ WORKDAY = [
      "site": "search"},
     {"company": "T-Mobile", "host": "tmobile.wd1.myworkdayjobs.com", "tenant": "tmobile",
      "site": "External"},
+    {"company": "Pfizer", "host": "pfizer.wd1.myworkdayjobs.com", "tenant": "pfizer",
+     "site": "PfizerCareers"},
     {"company": "Johnson & Johnson", "host": "jj.wd5.myworkdayjobs.com", "tenant": "jj",
      "site": "JJ", "facets": {"jobFamilyGroup": ["604dc786859810010c31cac940da0000"]},
      "scan_all": True},  # "Career Programs" = internships, co-ops, grad programs
@@ -335,7 +337,7 @@ INDUSTRIES = {
         "Activision", "Aviagames", "CHAO.S PR", "Dow Jones", "Nintendo", "Roblox",
         "The New York Times", "Twitch",
     ],
-    "Healthcare & Medical": ["Philips", "Stryker"],
+    "Healthcare & Medical": ["Pfizer", "Philips", "Stryker"],
     "Energy & Utilities": ["American Electric Power", "Duke Energy"],
     "Airlines & Travel": ["Delta Air Lines", "Southwest Airlines", "United Airlines"],
     "Consulting & Services": [
