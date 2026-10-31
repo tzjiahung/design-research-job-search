@@ -248,6 +248,10 @@ EIGHTFOLD = [
     {"company": "Eaton", "base": "https://eaton.eightfold.ai", "domain": "eaton.com"},
 ]
 # Classic iCIMS boards (links go to <name>.icims.com/jobs/...).
+# Radancy (TalentBrew) career sites, e.g. jobs.<company>.com/en/search-jobs.
+RADANCY = [
+    {"company": "Carrier", "base": "https://jobs.carrier.com/en"},
+]
 ICIMS = [
     {"company": "Cotiviti", "base": "https://careers-cotiviti.icims.com"},
     {"company": "Cotiviti", "base": "https://globalcareers-cotiviti.icims.com"},
@@ -317,7 +321,7 @@ INDUSTRIES = {
     "Aerospace & Defense": ["Anduril", "Gulfstream Aerospace", "Rolls-Royce"],
     "Hardware & Electronics": ["Garmin", "HP", "Matic", "NVIDIA", "Vertiv", "Yoto"],
     "Manufacturing & Industrial": [
-        "3M", "Allegion", "Crown Equipment", "Elkay Manufacturing", "Grainger",
+        "3M", "Allegion", "Carrier", "Crown Equipment", "Elkay Manufacturing", "Grainger",
         "Hubbell Incorporated", "James Hardie", "Keen Project Solutions", "Oshkosh",
         "Stanley Black & Decker",
     ],

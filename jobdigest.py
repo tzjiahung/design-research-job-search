@@ -686,6 +686,29 @@ def from_icims(site):
     return out
 
 
+def from_radancy(site):
+    """Radancy sites put the Workday board behind their own search, which returns
+    its result list as HTML inside JSON."""
+    out = {}
+    for term in ["intern", "co-op"]:
+        url = f"{site['base']}/search-jobs/results?" + urllib.parse.urlencode(
+            {"CurrentPage": 1, "RecordsPerPage": 500, "Keywords": term, "SearchType": 5,
+             "SearchResultsModuleName": "Search Results",
+             "SearchFiltersModuleName": "Search Filters"})
+        page = fetch_json(url, headers={"X-Requested-With": "XMLHttpRequest"})
+        for href, title, where in re.findall(
+                r'<a href="(/[^"]*/job/[^"]+)"[^>]*>\s*<h2>(.*?)</h2>'
+                r'\s*<p class="job-location[^"]*">(.*?)</p>', page.get("results", ""), re.S):
+            title = text_of(title)
+            if is_design_internship(title):
+                # One office per line, e.g. "CAI23: Carrier-Indianapolis, ..., IN, 46231 USA".
+                locations = [text_of(l) for l in html.unescape(where).splitlines() if l.strip()]
+                out[href] = job(site["company"], title,
+                                urllib.parse.urljoin(site["base"], href), locations,
+                                "Radancy", "Not stated")
+    return list(out.values())
+
+
 def from_snap():
     """Snap's careers site returns every job in one response."""
     data = fetch_json("https://careers.snap.com/api/jobs")
@@ -1297,6 +1320,7 @@ def collect():
     tasks += [(f"jibe:{s['company']}", from_jibe, s) for s in config.JIBE]
     tasks += [(f"eightfold:{s['company']}", from_eightfold, s) for s in config.EIGHTFOLD]
     tasks += [(f"icims:{s['company']}", from_icims, s) for s in config.ICIMS]
+    tasks += [(f"radancy:{s['company']}", from_radancy, s) for s in config.RADANCY]
     tasks.append(("simplify", lambda _: from_simplify(), None))
 
     jobs, errors, failed = [], [], []
