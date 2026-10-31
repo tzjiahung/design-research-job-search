@@ -201,6 +201,8 @@ WORKDAY = [
      "site": "External"},
     {"company": "Pfizer", "host": "pfizer.wd1.myworkdayjobs.com", "tenant": "pfizer",
      "site": "PfizerCareers"},
+    {"company": "Disney", "host": "disney.wd5.myworkdayjobs.com", "tenant": "disney",
+     "site": "disneycareer"},
     {"company": "Johnson & Johnson", "host": "jj.wd5.myworkdayjobs.com", "tenant": "jj",
      "site": "JJ", "facets": {"jobFamilyGroup": ["604dc786859810010c31cac940da0000"]},
      "scan_all": True},  # "Career Programs" = internships, co-ops, grad programs
@@ -334,7 +336,7 @@ INDUSTRIES = {
         "Procter & Gamble", "Target", "The Home Depot", "Uline",
     ],
     "Games, Media & Entertainment": [
-        "Activision", "Aviagames", "CHAO.S PR", "Dow Jones", "Nintendo", "Roblox",
+        "Activision", "Aviagames", "CHAO.S PR", "Disney", "Dow Jones", "Nintendo", "Roblox",
         "The New York Times", "Twitch",
     ],
     "Healthcare & Medical": ["Pfizer", "Philips", "Stryker"],
