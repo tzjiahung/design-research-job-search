@@ -102,7 +102,7 @@ INTERN_PATTERNS = [
 TAIWAN_TERMS = ["設計", "實習", "UX", "UI", "使用者"]
 
 # Which regions to keep. Remote roles are kept when they aren't tied to another country.
-REGIONS = ["US", "Singapore", "Hong Kong", "London", "Taiwan"]
+REGIONS = ["US", "Hong Kong", "Taiwan"]
 
 # Companies whose job boards are read directly. Add more any time:
 # find the company's careers page; if links go to boards.greenhouse.io/<slug>,
@@ -283,10 +283,8 @@ PHENOM = [
 ]
 SUCCESSFACTORS = [
     {"company": "TSMC", "search": "https://ro.careers.tsmc.com/search/"},
-    {"company": "KPMG", "search": "https://careers.kpmg.com.sg/search/", "location": "Singapore"},
-    {"company": "Deloitte", "search": "https://jobs.sea.deloitte.com/search/"},
     {"company": "EY", "search": "https://careers.ey.com/ey/search/",
-     "locations": ["United States", "Singapore", "Hong Kong", "London"]},
+     "locations": ["United States", "Hong Kong"]},
     {"company": "Under Armour", "search": "https://careers.underarmour.com/search/"},
     {"company": "adidas", "search": "https://jobs.adidas-group.com/search/"},
 ]

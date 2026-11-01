@@ -144,7 +144,10 @@ def sponsorship_from_text(text):
 def regions_for(locations):
     joined = " | ".join(locations)
     found = [name for name, rx in REGION_RES.items() if name in config.REGIONS and rx.search(joined)]
-    if not found and re.search(r"remote|anywhere", joined, re.I) and not FOREIGN_RE.search(joined):
+    # A region we've switched off (e.g. "Remote - Singapore") counts as foreign too.
+    elsewhere = FOREIGN_RE.search(joined) or any(
+        rx.search(joined) for name, rx in REGION_RES.items() if name not in config.REGIONS)
+    if not found and re.search(r"remote|anywhere", joined, re.I) and not elsewhere:
         found = ["Remote"]
     return found
 
@@ -827,7 +830,7 @@ def from_foxconn():
 
 
 def from_successfactors(site):
-    """SAP SuccessFactors career sites (TSMC overseas, KPMG Singapore, Deloitte SEA, EY). HTML.
+    """SAP SuccessFactors career sites (TSMC overseas, EY, Under Armour, adidas). HTML.
     Results come as table rows on most sites and as tiles on some (Under Armour)."""
     base = re.match(r"https://[^/]+", site["search"]).group(0)
     out = {}
@@ -981,8 +984,7 @@ def from_jotform():
 
 def from_accenture():
     out = {}
-    countries = [("USA", "us-en"), ("Singapore", "sg-en"), ("Hong Kong", "hk-en"),
-                 ("United Kingdom", "gb-en")]
+    countries = [("USA", "us-en"), ("Hong Kong", "hk-en")]
     for term in SEARCH_TERMS:
         for country, site in countries:
             fields = {"startIndex": "0", "maxResultSize": "50", "jobKeyword": term,
