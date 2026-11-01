@@ -1,7 +1,7 @@
 # Design internship digest
 
 Three emails a day (11am, 3pm and 9pm Seattle time) with every new UX / product design /
-UX research internship in the US, Singapore, Hong Kong, London and Taiwan. Each job appears
+UX research internship in the US, Hong Kong and Taiwan. Each job appears
 once, even when several boards list it.
 
 **Sources:**
@@ -85,7 +85,7 @@ intern board) skip this check.
 "X Design Intern" titles where X is an engineering field. To change any of this, edit
 the lists in `config.py`.
 
-**Locations** (`REGIONS`): US, Singapore, Hong Kong, London and Taiwan. Remote roles count
+**Locations** (`REGIONS`): US, Hong Kong and Taiwan (Singapore and London were dropped on 2026-11-01). Remote roles count
 unless they're tied to another country.
 
 ## When emails arrive, and why
