@@ -322,7 +322,7 @@ INDUSTRIES = {
         "DemaDose", "Dice", "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta",
         "Microsoft", "MongoDB", "Nominal", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir",
         "Patreon", "Pinterest", "Quip", "Read AI", "Red Hat", "Reddit", "Salesforce",
-        "SeatGeek", "Slack", "Superhuman", "The Browser Company", "TikTok", "Tractian",
+        "SeatGeek", "Shopify", "Slack", "Superhuman", "The Browser Company", "TikTok", "Tractian",
         "Tumblr", "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
     ],
     "Finance & Fintech": [
