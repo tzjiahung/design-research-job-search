@@ -14,7 +14,7 @@ import urllib.parse
 
 import config
 
-from jobdigest import fetch_json
+from jobdigest import fetch_json, plain_name
 
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 TAB = "Openings"
@@ -26,13 +26,6 @@ STAGES = ["Saved", "Applied", "Interviewing", "Rejected", "Offer"]  # "Applicati
 # Alert emails just stop mentioning a job, so they can't tell us it closed.
 UNCHECKABLE = {"email alerts"}
 USER_OWNED = {"Application", "Applied on", "Notes"}
-
-
-def plain_name(company):
-    """"Hubbell Incorporated", "Cityfurnish (YC W19)" -> "hubbell", "cityfurnish"."""
-    name = re.sub(r"\(.*?\)", "", company).lower()
-    name = re.sub(r"[,.]?\s+(inc|incorporated|corp|corporation|llc|co|usa)\.?$", "", name.strip())
-    return name.strip(" ,.")
 
 
 INDUSTRY = {plain_name(c): ind for ind, cos in config.INDUSTRIES.items() for c in cos}

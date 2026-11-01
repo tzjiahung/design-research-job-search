@@ -417,23 +417,6 @@ def from_phenom(site):
     ]
 
 
-def from_ibm():
-    out = []
-    for term in SEARCH_TERMS:
-        body = {"appId": "careers", "scopes": ["careers2"], "size": 50, "from": 0, "lang": "zz",
-                "query": {"bool": {"must": [{"simple_query_string": {
-                    "query": term, "fields": ["title^2", "description"]}}]}},
-                "_source": ["title", "url", "dcdate", "field_keyword_05", "field_keyword_19"]}
-        for hit in fetch_json("https://www-api.ibm.com/search/api/v2", body)["hits"]["hits"]:
-            src = hit["_source"]
-            if is_design_internship(src.get("title", "")):
-                loc = ", ".join(x for x in (src.get("field_keyword_19"),
-                                            src.get("field_keyword_05")) if x)
-                out.append(job("IBM", src["title"], src["url"], [loc], "IBM", "Not stated",
-                               src.get("dcdate")))
-    return out
-
-
 def from_mathworks():
     import xml.etree.ElementTree as ET
     # Their bot filter blocks browser-looking user agents but allows plain ones.
@@ -1309,7 +1292,7 @@ def collect():
     tasks += [(f"oracle:{s['company']}", from_oracle, s) for s in config.ORACLE]
     tasks += [(f"phenom:{s['company']}", from_phenom, s) for s in config.PHENOM]
     tasks += [(name, lambda fn: fn(), fn) for name, fn in [
-        ("ibm", from_ibm), ("mathworks", from_mathworks), ("google", from_google),
+        ("mathworks", from_mathworks), ("google", from_google),
         ("apple", from_apple), ("meta", from_meta), ("bytedance", from_bytedance),
         ("tiktok", from_tiktok), ("atlassian", from_atlassian), ("microsoft", from_microsoft),
         ("amazon", from_amazon), ("walmart", from_walmart), ("foxconn", from_foxconn),
@@ -1353,12 +1336,24 @@ def norm(text):
     return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
 
+def plain_name(company):
+    """"Hubbell Incorporated", "Cityfurnish (YC W19)" -> "hubbell", "cityfurnish"."""
+    name = re.sub(r"\(.*?\)", "", company).lower()
+    name = re.sub(r"[,.]?\s+(inc|incorporated|corp|corporation|llc|co|usa)\.?$", "", name.strip())
+    return name.strip(" ,.")
+
+
+SKIP_COMPANIES = {plain_name(c) for c in config.SKIP_COMPANIES}
+
+
 def merge(jobs):
     """One entry per company + title, however many boards list it."""
     merged = {}
     for j in jobs:
         regions = regions_for(j["locations"])
         if not regions:
+            continue
+        if plain_name(j["company"]) in SKIP_COMPANIES:
             continue
         company = norm(j["company"])
         key = f"{config.COMPANY_ALIASES.get(company, company)}|{norm(j['title'])}"
