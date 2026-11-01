@@ -144,9 +144,10 @@ def sponsorship_from_text(text):
 def regions_for(locations):
     joined = " | ".join(locations)
     found = [name for name, rx in REGION_RES.items() if name in config.REGIONS and rx.search(joined)]
-    # A region we've switched off (e.g. "Remote - Singapore") counts as foreign too.
-    elsewhere = FOREIGN_RE.search(joined) or any(
-        rx.search(joined) for name, rx in REGION_RES.items() if name not in config.REGIONS)
+    # Remote roles based in a region we've switched off (e.g. "Remote - London, UK" or
+    # "Remote - Singapore") still count as Remote, even though "UK" is otherwise foreign.
+    old_region = any(rx.search(joined) for rx in REGION_RES.values())
+    elsewhere = FOREIGN_RE.search(joined) and not old_region
     if not found and re.search(r"remote|anywhere", joined, re.I) and not elsewhere:
         found = ["Remote"]
     return found
