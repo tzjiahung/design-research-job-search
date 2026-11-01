@@ -84,6 +84,13 @@ CLEAR_UX_TERMS = [
     r"human[- ]computer interaction", r"human[- ]centered design",
 ]
 
+# Titles naming only a PhD ("UX Research Intern, PhD") are skipped; "MS/PhD" or
+# "BS/MS/PhD" are kept because another degree is listed too.
+PHD_PATTERNS = [r"\bph\.?\s?d\b", r"doctora(l|te)"]
+OTHER_DEGREE_PATTERNS = [
+    r"\b(bs|ba|ms|ma|mba|msc|bsc)\b", r"bachelor", r"master", r"undergrad", r"graduate student",
+]
+
 # A title must match one of these to count as an internship.
 INTERN_PATTERNS = [
     r"\bintern(ship)?s?\b", r"co-?op\b", r"\bplacement\b", r"\bsummer 20\d\d\b",
