@@ -157,8 +157,16 @@ UX_ONLY_WITH_RE = re.compile("|".join(config.UX_ONLY_WITH), re.I)
 CLEAR_UX_RE = re.compile("|".join(config.CLEAR_UX_TERMS), re.I)
 
 
+PHD_RE = re.compile("|".join(config.PHD_PATTERNS), re.I)
+OTHER_DEGREE_RE = re.compile("|".join(config.OTHER_DEGREE_PATTERNS), re.I)
+
+
+def phd_only(title):
+    return bool(PHD_RE.search(title) and not OTHER_DEGREE_RE.search(title))
+
+
 def is_design_role(title):
-    if EXCLUDE_RE.search(title):
+    if EXCLUDE_RE.search(title) or phd_only(title):
         return False
     if UX_ONLY_WITH_RE.search(title) and not CLEAR_UX_RE.search(title):
         return False
@@ -178,7 +186,7 @@ UX_RESEARCH_CONTEXT_RE = re.compile(
 def maybe_ux_research(title):
     """A generic research internship that needs its description checked."""
     return bool(INTERN_RE.search(title) and GENERIC_RESEARCH_RE.search(title)
-                and not EXCLUDE_RE.search(title))
+                and not EXCLUDE_RE.search(title) and not phd_only(title))
 
 
 def is_design_internship(title, text=None):
@@ -436,7 +444,7 @@ def from_mathworks():
         title = item.findtext("title_raw") or item.findtext("title") or ""
         if not is_design_internship(title) and not (
             item.findtext("job_type") == "Internships" and ROLE_RE.search(title)
-            and not EXCLUDE_RE.search(title)
+            and not EXCLUDE_RE.search(title) and not phd_only(title)
         ):
             continue
         loc = item.findtext("locationName") or ", ".join(
