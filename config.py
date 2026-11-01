@@ -137,6 +137,10 @@ ASHBY = [
     "strava", "tonal", "runna", "ladder",
 ]
 # Studios/brands that repost the same job; treated as one company when de-duplicating.
+# Companies the user doesn't want, whichever board lists them (matched like the
+# industry map: ignoring case, a trailing "Inc."/"Corporation" and parentheses).
+SKIP_COMPANIES = ["IBM"]
+
 COMPANY_ALIASES = {
     "activision blizzard": "activision", "raven software": "activision",
     "treyarch": "activision", "blizzard": "activision", "doordash": "doordash usa",
