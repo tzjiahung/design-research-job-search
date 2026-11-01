@@ -1354,20 +1354,47 @@ def merge(jobs):
             continue
         company = norm(j["company"])
         key = f"{config.COMPANY_ALIASES.get(company, company)}|{norm(j['title'])}"
-        m = merged.setdefault(key, dict(j, key=key, regions=regions, links={}, received={},
+        m = merged.setdefault(key, dict(j, key=key, regions=[], links={}, received={},
                                         tasks=set()))
-        m["links"].setdefault(j["source"], j["url"])
-        m["tasks"].add(j["task"])
-        if j.get("received"):  # earliest alert email per source
-            prev = m["received"].get(j["source"])
-            m["received"][j["source"]] = min(prev, j["received"]) if prev else j["received"]
-        m["locations"] = sorted(set(m["locations"]) | set(j["locations"]))
-        m["regions"] = [r for r in REGION_ORDER if r in set(m["regions"]) | set(regions)]
-        if m["sponsorship"] == "Not stated":
-            m["sponsorship"] = j["sponsorship"]
-        if j["posted"] and (not m["posted"] or j["posted"] < m["posted"]):
-            m["posted"] = j["posted"]
+        absorb(m, dict(j, regions=regions, links={j["source"]: j["url"]},
+                       received={j["source"]: j["received"]} if j.get("received") else {},
+                       tasks={j["task"]}))
+    fold_shortened_alerts(merged)
     return list(merged.values())
+
+
+def absorb(m, j):
+    """Add what `j` knows about a job to the merged entry `m`."""
+    for source, url in j["links"].items():
+        m["links"].setdefault(source, url)
+    m["tasks"] |= j["tasks"]
+    for source, day in j["received"].items():  # earliest alert email per source
+        prev = m["received"].get(source)
+        m["received"][source] = min(prev, day) if prev else day
+    m["locations"] = sorted(set(m["locations"]) | set(j["locations"]))
+    m["regions"] = [r for r in REGION_ORDER if r in set(m["regions"]) | set(j["regions"])]
+    if m["sponsorship"] == "Not stated":
+        m["sponsorship"] = j["sponsorship"]
+    if j["posted"] and (not m["posted"] or j["posted"] < m["posted"]):
+        m["posted"] = j["posted"]
+
+
+def fold_shortened_alerts(merged):
+    """Alert emails sometimes shorten a title, e.g. Handshake's "UX Research Intern -
+    Summer 2027" for ServiceNow's "Experience Team – UX Research Internships – Summer
+    2027". Fold an alert-only job into the one other job at that company whose title
+    has all of its words; when several do, it's unclear which, so leave it."""
+    def words(key):  # keys keep "internships" as is; changing norm() would re-key the sheet
+        return {"intern" if w == "internships" else w for w in key.split("|")[1].split()}
+
+    for key, j in list(merged.items()):
+        if j["tasks"] != {"email alerts"}:
+            continue
+        company = key.split("|")[0]
+        homes = [k for k in merged if k != key and k.split("|")[0] == company
+                 and words(key) < words(k)]
+        if len(homes) == 1:
+            absorb(merged[homes[0]], merged.pop(key))
 
 
 # ---------- email ----------
