@@ -700,6 +700,32 @@ def from_radancy(site):
     return list(out.values())
 
 
+def from_shopify():
+    """Shopify's own careers page embeds every posting (title + link) in its page data;
+    each matching job's page then gives its location and posting date."""
+    page = fetch("https://www.shopify.com/careers", headers={"Accept": "text/html"}).decode()
+    out = []
+    paths = dict((uid, path) for path, uid in re.findall(
+        r'(/careers/[a-z0-9-]+_([0-9a-f-]{36}))\\"', page))
+    # The data is deduplicated, so a posting reads either "<id>","<title>",... or,
+    # the first time, "<id>","title","<title>",... A second posting with an
+    # identical title only points back to it and is skipped; the first one is found.
+    for uid, title in sorted(set(re.findall(
+            r'\\"([0-9a-f-]{36})\\",(?:\\"title\\",)?\\"((?:[^"\\]|\\+u[0-9a-f]{4})+)\\"',
+            page))):
+        title = re.sub(r"\\+u([0-9a-f]{4})", lambda m: chr(int(m.group(1), 16)), title)
+        if uid not in paths or not is_design_internship(title):
+            continue
+        path = paths[uid]
+        url = "https://www.shopify.com" + path
+        detail = fetch(url, headers={"Accept": "text/html"}).decode()
+        prop = lambda name: (re.findall(rf'itemProp="{name}" content="([^"]*)"', detail) or [""])
+        out.append(job("Shopify", title, url,
+                       [html.unescape(a) for a in prop("address")], "Shopify", "Not stated",
+                       prop("datePosted")[0] or None))
+    return out
+
+
 def from_snap():
     """Snap's careers site returns every job in one response."""
     data = fetch_json("https://careers.snap.com/api/jobs")
@@ -1301,7 +1327,7 @@ def collect():
         ("sound-transit", from_sound_transit), ("allen-institute", from_allen_institute),
         ("accenture", from_accenture), ("mckinsey", from_mckinsey),
         ("email alerts", from_email_alerts), ("interndock", from_interndock),
-        ("snap", from_snap), ("jotform", from_jotform),
+        ("snap", from_snap), ("jotform", from_jotform), ("shopify", from_shopify),
     ]]
     tasks += [(f"successfactors:{s['company']}", from_successfactors, s)
               for s in config.SUCCESSFACTORS]
