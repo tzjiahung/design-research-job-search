@@ -153,7 +153,7 @@ NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mob
          "aloyoga": "Alo Yoga", "fanaticsinc": "Fanatics", "future": "Future (fitness coaching)",
          "bauerhockeycascademaveriklacrosse": "Bauer", "ladder": "Ladder (fitness app)",
          "ajaia": "Ajaia"}
-SMARTRECRUITERS = ["wise", "servicenow", "asics", "salomon"]
+SMARTRECRUITERS = ["wise", "servicenow", "asics", "salomon", "canva"]
 # Workable boards: apply.workable.com/<slug>.
 WORKABLE = ["ajaia"]
 # Teamtailor career sites (pages show "teamtailor" in their source); read via <base>/jobs.rss.
@@ -316,7 +316,7 @@ SIMPLIFY_URL = (
 # blank there (fill them in by hand, or add them here).
 INDUSTRIES = {
     "Tech & Software": [
-        "1Password", "Adobe", "Anthropic", "Atlassian", "Colibri Group", "Databricks",
+        "1Password", "Adobe", "Anthropic", "Atlassian", "Canva", "Colibri Group", "Databricks",
         "DemaDose", "Dice", "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta",
         "Microsoft", "MongoDB", "Nominal", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir",
         "Patreon", "Pinterest", "Quip", "Read AI", "Red Hat", "Reddit", "Salesforce",
