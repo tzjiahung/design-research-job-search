@@ -40,7 +40,7 @@ OTHER_DESIGN_FIELDS = [
     r"editorial",
     # engineering / science design
     r"propulsion", r"roadway", r"transportation", r"\btest\b", r"fpga", r"vlsi", r"rtl",
-    r"silicon", r"semiconductor", r"\bpcb\b", r"electronic", r"dram", r"memory",
+    r"silicon", r"semiconductor", r"layout", r"\bpcb\b", r"electronic", r"dram", r"memory",
     r"protein", r"molecul", r"\bdrug\b", r"automation", r"software", r"analytic",
     r"analyst", r"technical design", r"process design", r"tool design", r"\bpower\b",
     r"\bgas\b", r"utility", r"\brf\b", r"antenna", r"optical", r"\bgame\b", r"level design",
