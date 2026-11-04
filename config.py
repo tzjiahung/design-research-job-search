@@ -15,7 +15,7 @@ ROLE_PATTERNS = [
     r"ux research",
     r"design research",
     r"experience research",
-    r"(brand|service|web|communication|creative) design",
+    r"(service|web|communication|creative) design",
     r"\bui ?/?ux\b",  # "UIUX", "UI/UX"
     r"design and research",
     r"\bhci\b", r"human[- ]computer interaction", r"human factors", r"human[- ]centered design",
@@ -77,7 +77,8 @@ EXCLUDE_PATTERNS = [
 
 # Excluded too, unless the title also has a clear UX term, so "Hardware UX Design Intern"
 # or "UX Research Intern, Hardware" count but "Hardware Design Intern" (chips) doesn't.
-UX_ONLY_WITH = [r"hardware"]
+# Same for brand design, which the user isn't pursuing.
+UX_ONLY_WITH = [r"hardware", r"\bbrand(s|ing)?\b"]
 CLEAR_UX_TERMS = [
     r"\bux\b", r"\bui\b", r"\bui ?/?ux\b", r"user experience", r"user research",
     r"ux research", r"interaction design", r"human factors", r"\bhci\b",
