@@ -1299,7 +1299,36 @@ def from_interndock():
                            "Intern Dock", "Not stated"))
     if company is None:
         raise RuntimeError("page layout changed (no listings found)")
-    return out
+    # Intern Dock keeps listings up after the employer closes them, so drop any whose
+    # posting is gone from the employer's own board.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        gone = list(pool.map(posting_gone, [j["url"] for j in out]))
+    return [j for j, g in zip(out, gone) if not g]
+
+
+GREENHOUSE_JOB_RE = re.compile(r"//(?:job-)?boards(?:\.eu)?\.greenhouse\.io/([^/?#]+)/jobs/(\d+)")
+LEVER_JOB_RE = re.compile(r"//jobs\.lever\.co/([^/?#]+)/([0-9a-f-]{36})")
+WORKDAY_JOB_RE = re.compile(r"//([^./]+)\.(wd\d+)\.myworkdayjobs\.com/(?:[a-z]{2}-[A-Z]{2}/)?([^/?#]+)/job/([^?#]+)")
+
+
+def posting_gone(url):
+    """True only when the employer's board says the posting no longer exists (a 404 from
+    its job API). Boards we can't check, and any other error, count as still open."""
+    if m := GREENHOUSE_JOB_RE.search(url):
+        api = f"https://boards-api.greenhouse.io/v1/boards/{m[1]}/jobs/{m[2]}"
+    elif m := LEVER_JOB_RE.search(url):
+        api = f"https://api.lever.co/v0/postings/{m[1]}/{m[2]}"
+    elif m := WORKDAY_JOB_RE.search(url):
+        api = f"https://{m[1]}.{m[2]}.myworkdayjobs.com/wday/cxs/{m[1]}/{m[3]}/job/{m[4]}"
+    else:
+        return False
+    try:
+        fetch(api)
+        return False
+    except urllib.error.HTTPError as exc:
+        return exc.code in (404, 410)
+    except Exception:
+        return False
 
 
 def from_simplify():
