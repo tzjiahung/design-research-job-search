@@ -92,6 +92,13 @@ OTHER_DEGREE_PATTERNS = [
     r"\b(bs|ba|ms|ma|mba|msc|bsc)\b", r"bachelor", r"master", r"undergrad", r"graduate student",
 ]
 
+# Titles naming only an undergrad degree ("UX Intern - Undergrad Students") are
+# skipped; "Undergraduate or Graduate" and "BS/MS" are kept.
+UNDERGRAD_PATTERNS = [r"undergrad", r"bachelor"]
+GRAD_PATTERNS = [
+    r"(?<!under)graduate", r"master", r"\b(ms|ma|mba|msc|mfa|mdes|mhci)\b", r"\bph\.?\s?d\b",
+]
+
 # A title must match one of these to count as an internship.
 INTERN_PATTERNS = [
     r"\bintern(ship)?s?\b", r"co-?op\b", r"\bplacement\b", r"\bsummer 20\d\d\b",
