@@ -18,7 +18,9 @@ once, even when several boards list it.
   T-Mobile, Uber, JPMorgan, Citi, Capital One, Dell, Ford, Honda, Sony, Samsung, TSMC,
   Foxconn, Garmin, Rivian, Snap, Logitech, Sonos, Bose, Dyson, DocuSign, GitHub,
   MathWorks, Johnson & Johnson, ...
-- The SimplifyJobs and Intern Dock internship lists, and Y Combinator startups
+- The SimplifyJobs and Intern Dock internship lists (Intern Dock links on Greenhouse,
+  Lever or Workday are checked, and dropped once the employer takes the posting down),
+  and Y Combinator startups
 - Job-alert emails in your inbox (Handshake, Jobright, Lenny's Jobs, LinkedIn), read without changing anything
 
 Edit [config.py](config.py) to change roles, regions or companies. A company that can't
