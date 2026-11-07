@@ -1094,7 +1094,10 @@ def from_ycombinator():
             raise RuntimeError("page layout changed")
         for j in json.loads(html.unescape(m.group(1)))["props"].get("jobPostings", []):
             intern = j.get("type") in ("Intern", "Internship") or INTERN_RE.search(j["title"])
-            design = j.get("role") == "design" or is_design_role(j["title"])
+            # YC's "design" category also holds graphic and brand roles, so it only
+            # decides for titles without a design word for is_design_role to judge.
+            design = is_design_role(j["title"]) or (
+                j.get("role") == "design" and not GENERIC_DESIGN_RE.search(j["title"]))
             if intern and design and not EXCLUDE_RE.search(j["title"]):
                 found[j["id"]] = j
     visa = {"US citizen/visa only": "No sponsorship", "Will sponsor": "Sponsors"}
