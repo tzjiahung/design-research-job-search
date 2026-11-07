@@ -77,8 +77,9 @@ EXCLUDE_PATTERNS = [
 
 # Excluded too, unless the title also has a clear UX term, so "Hardware UX Design Intern"
 # or "UX Research Intern, Hardware" count but "Hardware Design Intern" (chips) doesn't.
-# Same for brand design, which the user isn't pursuing.
-UX_ONLY_WITH = [r"hardware", r"\bbrand(s|ing)?\b"]
+# Same for brand and graphic design, which the user isn't pursuing ("Graphic & Visual
+# Designer Intern" is out, "Graphic Design Intern (UX/UI)" stays).
+UX_ONLY_WITH = [r"hardware", r"\bbrand(s|ing)?\b", r"graphic"]
 CLEAR_UX_TERMS = [
     r"\bux\b", r"\bui\b", r"\bui ?/?ux\b", r"user experience", r"user research",
     r"ux research", r"interaction design", r"human factors", r"\bhci\b",
