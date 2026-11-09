@@ -141,7 +141,7 @@ LEVER = ["spotify", "palantir", "crypto", "binance", "brooksrunning", "zoox"]
 ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "Superhuman Platform Inc", "mobbin.com",
-    "whoop", "eightsleep", "skydio", "1x", "wayve", "harvey",
+    "whoop", "eightsleep", "skydio", "1x", "wayve", "harvey", "amplify",
     # sports / fitness apps
     "strava", "tonal", "runna", "ladder",
 ]
