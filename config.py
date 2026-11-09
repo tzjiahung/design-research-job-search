@@ -151,7 +151,8 @@ ASHBY = [
 SKIP_COMPANIES = ["IBM"]
 # Jobs known not to sponsor when the posting doesn't say so (e.g. alert emails have no
 # description). Values are the sheet's Key column.
-NO_SPONSORSHIP_JOBS = ["cna insurance|technology intern program agile product design"]
+NO_SPONSORSHIP_JOBS = ["cna insurance|technology intern program agile product design",
+                       "sequoia|ui ux software intern summer"]  # US citizens only
 
 COMPANY_ALIASES = {
     "activision blizzard": "activision", "raven software": "activision",
