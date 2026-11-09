@@ -1436,6 +1436,9 @@ def merge(jobs):
                        received={j["source"]: j["received"]} if j.get("received") else {},
                        tasks={j["task"]}))
     fold_shortened_alerts(merged)
+    for key in config.NO_SPONSORSHIP_JOBS:
+        if key in merged:
+            merged[key]["sponsorship"] = "No sponsorship"
     return list(merged.values())
 
 

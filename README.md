@@ -220,3 +220,6 @@ Read from the job description where the source provides one.
 - **Sponsors**: the posting says sponsorship is available.
 - **Not stated**: the posting doesn't say, or the source has no description (alert
   emails, lists like Intern Dock). Check the posting or ask the recruiter.
+
+If you find out a job doesn't sponsor, add its sheet Key to `NO_SPONSORSHIP_JOBS` in
+`config.py`. Editing only the sheet won't last, because each run rewrites that column.

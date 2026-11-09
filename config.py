@@ -149,6 +149,9 @@ ASHBY = [
 # Companies the user doesn't want, whichever board lists them (matched like the
 # industry map: ignoring case, a trailing "Inc."/"Corporation" and parentheses).
 SKIP_COMPANIES = ["IBM"]
+# Jobs known not to sponsor when the posting doesn't say so (e.g. alert emails have no
+# description). Values are the sheet's Key column.
+NO_SPONSORSHIP_JOBS = ["cna insurance|technology intern program agile product design"]
 
 COMPANY_ALIASES = {
     "activision blizzard": "activision", "raven software": "activision",
