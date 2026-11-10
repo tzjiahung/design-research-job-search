@@ -99,6 +99,17 @@ UNDERGRAD_PATTERNS = [r"undergrad", r"bachelor"]
 GRAD_PATTERNS = [
     r"(?<!under)graduate", r"master", r"\b(ms|ma|mba|msc|mfa|mdes|mhci)\b", r"\bph\.?\s?d\b",
 ]
+# Descriptions that ask only for undergrads ("Second-year undergraduate student pursuing a
+# Bachelor's degree") are skipped too, unless they also mention a graduate degree.
+UNDERGRAD_TEXT_PATTERNS = [
+    r"undergraduate students?\b",
+    r"(pursuing|enrolled in|working toward)[^.\n]{0,40}(bachelor|undergraduate)",
+]
+GRAD_TEXT_PATTERNS = [
+    r"\bmaster(['’]?s)?\b", r"(?<!under)graduate (student|degree|program|school)",
+    r"\b(ms|mba|mfa|mdes|mhci)\b",
+    r"\bph\.?\s?d\b",
+]
 
 # A title must match one of these to count as an internship.
 INTERN_PATTERNS = [

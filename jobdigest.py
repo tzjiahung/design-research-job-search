@@ -141,6 +141,17 @@ def sponsorship_from_text(text):
     return "Not stated"
 
 
+class Described(str):
+    """A sponsorship label that also remembers whether the description is undergrad-only."""
+    undergrad_only = False
+
+
+def described(text):
+    label = Described(sponsorship_from_text(text))
+    label.undergrad_only = undergrad_only_text(text)
+    return label
+
+
 def regions_for(locations):
     joined = " | ".join(locations)
     found = [name for name, rx in REGION_RES.items() if name in config.REGIONS and rx.search(joined)]
@@ -175,6 +186,14 @@ GRAD_RE = re.compile("|".join(config.GRAD_PATTERNS), re.I)
 
 def undergrad_only(title):
     return bool(UNDERGRAD_RE.search(title) and not GRAD_RE.search(title))
+
+
+UNDERGRAD_TEXT_RE = re.compile("|".join(config.UNDERGRAD_TEXT_PATTERNS), re.I)
+GRAD_TEXT_RE = re.compile("|".join(config.GRAD_TEXT_PATTERNS), re.I)
+
+
+def undergrad_only_text(text):
+    return bool(UNDERGRAD_TEXT_RE.search(text) and not GRAD_TEXT_RE.search(text))
 
 
 def wrong_degree(title):
@@ -218,7 +237,8 @@ def job(company, title, url, locations, source, sponsorship, posted=None):
         "url": url,
         "locations": [l.strip() for l in locations if l and l.strip()],
         "source": source,
-        "sponsorship": sponsorship,
+        "sponsorship": str(sponsorship),
+        "undergrad_only": getattr(sponsorship, "undergrad_only", False),
         "posted": posted,
     }
 
@@ -241,7 +261,7 @@ def from_greenhouse(slug):
         locs += [o.get("name", "") for o in j.get("offices", [])]
         out.append(job(
             config.NAMES.get(slug) or j.get("company_name") or slug.title(), title,
-            j["absolute_url"], locs, "Greenhouse", sponsorship_from_text(text),
+            j["absolute_url"], locs, "Greenhouse", described(text),
             (j.get("first_published") or j.get("updated_at") or "")[:10] or None,
         ))
     return out
@@ -259,7 +279,7 @@ def from_lever(slug):
         locs = cats.get("allLocations") or [cats.get("location", "")]
         posted = datetime.datetime.fromtimestamp(j["createdAt"] / 1000, datetime.timezone.utc).date().isoformat()
         out.append(job(config.NAMES.get(slug, slug.title()), j["text"], j["hostedUrl"], locs, "Lever",
-                       sponsorship_from_text(text), posted))
+                       described(text), posted))
     return out
 
 
@@ -275,7 +295,7 @@ def from_ashby(slug):
         if j.get("isRemote"):
             locs.append("Remote")
         out.append(job(config.NAMES.get(slug, slug.title()), j["title"], j["jobUrl"], locs, "Ashby",
-                       sponsorship_from_text(j.get("descriptionPlain", "")),
+                       described(j.get("descriptionPlain", "")),
                        (j.get("publishedAt") or "")[:10] or None))
     return out
 
@@ -297,7 +317,7 @@ def from_smartrecruiters(slug):
             locs = [loc.get("fullLocation", "")] + (["Remote"] if loc.get("remote") else [])
             out.append(job(j["company"]["name"], j["name"],
                            f"https://jobs.smartrecruiters.com/{slug}/{j['id']}", locs,
-                           "SmartRecruiters", sponsorship_from_text(text),
+                           "SmartRecruiters", described(text),
                            (j.get("releasedDate") or "")[:10] or None))
         offset += 100
         if offset >= page.get("totalFound", 0):
@@ -318,7 +338,7 @@ def from_workable(slug):
         if j.get("telecommuting"):
             locs.append("Remote")
         out.append(job(config.NAMES.get(slug, data.get("name") or slug.title()), j["title"],
-                       j["url"], locs, "Workable", sponsorship_from_text(text),
+                       j["url"], locs, "Workable", described(text),
                        j.get("published_on")))
     return out
 
@@ -341,7 +361,7 @@ def from_teamtailor(site):
         pub = item.findtext("pubDate")
         posted = email.utils.parsedate_to_datetime(pub).date().isoformat() if pub else None
         out.append(job(site["company"], title, item.findtext("link"), locs, "Teamtailor",
-                       sponsorship_from_text(text), posted))
+                       described(text), posted))
     return out
 
 
@@ -375,7 +395,7 @@ def from_workday(site):
             continue  # a generic "Research Intern" that isn't UX research
         locs = [info.get("location", "")] + info.get("additionalLocations", [])
         out.append(job(site["company"], title, f"https://{host}/{name}{path}", locs, "Workday",
-                       sponsorship_from_text(strip_html(info.get("jobDescription"))),
+                       described(strip_html(info.get("jobDescription"))),
                        info.get("startDate")))
     return out
 
@@ -406,7 +426,7 @@ def from_oracle(site):
         out.append(job(site["company"], r["Title"],
                        f"https://{host}/hcmUI/CandidateExperience/en/sites/"
                        f"{site.get('url_site', num)}/job/{rid}",
-                       locs, "Oracle", sponsorship_from_text(text), r.get("PostedDate")))
+                       locs, "Oracle", described(text), r.get("PostedDate")))
     return out
 
 
@@ -427,7 +447,7 @@ def from_phenom(site):
     return [
         job(site["company"], j["title"], f"{site['base']}/{site.get('path', 'us/en')}/job/{jid}",
             j.get("multi_location") or [j.get("location", "")], "Phenom",
-            sponsorship_from_text(j.get("descriptionTeaser", "")),
+            described(j.get("descriptionTeaser", "")),
             (j.get("postedDate") or "")[:10] or None)
         for jid, j in found.items()
     ]
@@ -631,7 +651,7 @@ def from_jibe(site):
         return (j.get("meta_data") or {}).get("canonical_url") or j.get("apply_url")
 
     return [job(site["company"], j["title"], url(j), [j.get("full_location", "")],
-                site["company"], sponsorship_from_text(strip_html(j.get("description"))),
+                site["company"], described(strip_html(j.get("description"))),
                 (j.get("posted_date") or "")[:10] or None)
             for j in found.values()]
 
@@ -659,7 +679,7 @@ def from_eightfold(site):
             continue  # a generic "Research Intern" that isn't UX research
         posted = p.get("postedTs")
         out.append(job(site["company"], p["name"], f"{base}{p['positionUrl']}",
-                       p.get("locations", []), "Eightfold", sponsorship_from_text(text),
+                       p.get("locations", []), "Eightfold", described(text),
                        datetime.datetime.fromtimestamp(posted, datetime.timezone.utc)
                        .date().isoformat() if posted else None))
     return out
@@ -688,7 +708,7 @@ def from_icims(site):
         if not is_design_internship(title, text):
             continue  # a generic "Research Intern" that isn't UX research
         posted = re.search(r'"datePosted"\s*:\s*"(\d{4}-\d\d-\d\d)', page)
-        out.append(job(site["company"], title, url, [loc], "iCIMS", sponsorship_from_text(text),
+        out.append(job(site["company"], title, url, [loc], "iCIMS", described(text),
                        posted and posted.group(1)))
     return out
 
@@ -800,7 +820,7 @@ def from_amazon():
                          j.get("description", "")])
         out.append(job("Amazon", j["title"], "https://www.amazon.jobs" + j["job_path"],
                        [j.get("normalized_location") or j.get("location", "")], "Amazon",
-                       sponsorship_from_text(strip_html(text)), posted))
+                       described(strip_html(text)), posted))
     return out
 
 
@@ -838,7 +858,7 @@ def from_foxconn():
             loc = ", ".join(x for x in (j.findtext("city"), j.findtext("state"),
                                         j.findtext("country")) if x)
             out.append(job("Foxconn (FII)", title, j.findtext("url"), [loc], "Foxconn",
-                           sponsorship_from_text(strip_html(j.findtext("description")))))
+                           described(strip_html(j.findtext("description")))))
     return out
 
 
@@ -1078,7 +1098,7 @@ def from_atlassian():
         post = j.get("portalJobPost") or {}
         out.append(job("Atlassian", j["title"],
                        f"https://www.atlassian.com/company/careers/details/{j['id']}",
-                       j.get("locations", []), "Atlassian", sponsorship_from_text(text),
+                       j.get("locations", []), "Atlassian", described(text),
                        (post.get("updatedDate") or "")[:10] or None))
     return out
 
@@ -1436,6 +1456,8 @@ def merge(jobs):
                        received={j["source"]: j["received"]} if j.get("received") else {},
                        tasks={j["task"]}))
     fold_shortened_alerts(merged)
+    # One board's description saying undergrads only rules out its alert-email copies too.
+    merged = {k: m for k, m in merged.items() if not m.get("undergrad_only")}
     for key in config.NO_SPONSORSHIP_JOBS:
         if key in merged:
             merged[key]["sponsorship"] = "No sponsorship"
@@ -1447,6 +1469,7 @@ def absorb(m, j):
     for source, url in j["links"].items():
         m["links"].setdefault(source, url)
     m["tasks"] |= j["tasks"]
+    m["undergrad_only"] = m.get("undergrad_only") or j.get("undergrad_only", False)
     for source, day in j["received"].items():  # earliest alert email per source
         prev = m["received"].get(source)
         m["received"][source] = min(prev, day) if prev else day
