@@ -331,7 +331,7 @@ INDUSTRIES = {
     "Tech & Software": [
         "1Password", "Adobe", "Anthropic", "Atlassian", "Canva", "Colibri Group", "Databricks",
         "DemaDose", "Dice", "DoorDash", "Figma", "Google", "IBM", "Immuta", "iSlide", "Meta",
-        "Microsoft", "MongoDB", "Nominal", "Nutanix", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir",
+        "Microsoft", "MongoDB", "Nominal", "Notion", "Nutanix", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir",
         "Patreon", "Pinterest", "Quip", "Read AI", "Red Hat", "Reddit", "Salesforce",
         "SeatGeek", "Shopify", "Slack", "Superhuman", "The Browser Company", "TikTok", "Tractian",
         "Tumblr", "UserZoom", "Veeam Software", "Workiva", "Workshop", "Zillow", "ZOVU",
