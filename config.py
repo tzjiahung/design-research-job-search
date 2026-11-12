@@ -162,6 +162,7 @@ ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "Superhuman Platform Inc", "mobbin.com",
     "whoop", "eightsleep", "skydio", "1x", "wayve", "harvey", "amplify",
+    "runway-ml", "n8n",
     # sports / fitness apps
     "strava", "tonal", "runna", "ladder",
 ]
@@ -186,7 +187,7 @@ NAMES = {"Superhuman Platform Inc": "Superhuman (Grammarly)", "mobbin.com": "Mob
          "goprojobs": "GoPro", "andurilindustries": "Anduril", "onrunning": "On",
          "aloyoga": "Alo Yoga", "fanaticsinc": "Fanatics", "future": "Future (fitness coaching)",
          "bauerhockeycascademaveriklacrosse": "Bauer", "ladder": "Ladder (fitness app)",
-         "ajaia": "Ajaia"}
+         "ajaia": "Ajaia", "runway-ml": "Runway", "n8n": "n8n"}
 SMARTRECRUITERS = ["wise", "servicenow", "asics", "salomon", "canva"]
 # Workable boards: apply.workable.com/<slug>.
 WORKABLE = ["ajaia"]
@@ -352,9 +353,9 @@ INDUSTRIES = {
     "Tech & Software": [
         "1Password", "Adobe", "Amplify", "Anthropic", "Atlassian", "Canva", "Colibri Group",
         "Databricks", "DemaDose", "Dice", "DoorDash", "Duolingo", "Figma", "Google", "IBM",
-        "Immuta", "iSlide", "Meta", "Microsoft", "MongoDB", "Nominal", "Notion", "Nutanix",
-        "OpenAI", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest", "Quip",
-        "Read AI", "Red Hat", "Reddit", "Salesforce", "SAS - Data and AI Solutions",
+        "Immuta", "iSlide", "Medium", "Meta", "Microsoft", "MongoDB", "n8n", "Nominal",
+        "Notion", "Nutanix", "OpenAI", "OpenArt AI", "OpenSesame", "Palantir", "Patreon", "Pinterest", "Quip",
+        "Read AI", "Red Hat", "Reddit", "Runway", "Salesforce", "SAS - Data and AI Solutions",
         "SeatGeek", "Shopify", "Slack", "Spira AI", "Superhuman", "The Browser Company",
         "TikTok", "Tractian", "Tumblr", "UserZoom", "Veeam Software", "Workiva", "Workshop",
         "Zillow", "ZOVU",
