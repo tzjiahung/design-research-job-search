@@ -142,13 +142,14 @@ def sponsorship_from_text(text):
 
 
 class Described(str):
-    """A sponsorship label that also remembers whether the description is undergrad-only."""
-    undergrad_only = False
+    """A sponsorship label that also remembers whether the description rules out a
+    master's student (undergrad-only or PhD-only)."""
+    wrong_degree = False
 
 
 def described(text):
     label = Described(sponsorship_from_text(text))
-    label.undergrad_only = undergrad_only_text(text)
+    label.wrong_degree = undergrad_only_text(text) or phd_only_text(text)
     return label
 
 
@@ -196,6 +197,14 @@ def undergrad_only_text(text):
     return bool(UNDERGRAD_TEXT_RE.search(text) and not GRAD_TEXT_RE.search(text))
 
 
+PHD_TEXT_RE = re.compile("|".join(config.PHD_TEXT_PATTERNS), re.I)
+NON_PHD_TEXT_RE = re.compile("|".join(config.NON_PHD_TEXT_PATTERNS), re.I)
+
+
+def phd_only_text(text):
+    return bool(PHD_TEXT_RE.search(text) and not NON_PHD_TEXT_RE.search(text))
+
+
 def wrong_degree(title):
     return phd_only(title) or undergrad_only(title)
 
@@ -238,7 +247,7 @@ def job(company, title, url, locations, source, sponsorship, posted=None):
         "locations": [l.strip() for l in locations if l and l.strip()],
         "source": source,
         "sponsorship": str(sponsorship),
-        "undergrad_only": getattr(sponsorship, "undergrad_only", False),
+        "wrong_degree": getattr(sponsorship, "wrong_degree", False),
         "posted": posted,
     }
 
@@ -1456,8 +1465,9 @@ def merge(jobs):
                        received={j["source"]: j["received"]} if j.get("received") else {},
                        tasks={j["task"]}))
     fold_shortened_alerts(merged)
-    # One board's description saying undergrads only rules out its alert-email copies too.
-    merged = {k: m for k, m in merged.items() if not m.get("undergrad_only")}
+    # One board's description saying undergrads only (or PhDs only) rules out its
+    # alert-email copies too.
+    merged = {k: m for k, m in merged.items() if not m.get("wrong_degree")}
     for key in config.NO_SPONSORSHIP_JOBS:
         if key in merged:
             merged[key]["sponsorship"] = "No sponsorship"
@@ -1469,7 +1479,7 @@ def absorb(m, j):
     for source, url in j["links"].items():
         m["links"].setdefault(source, url)
     m["tasks"] |= j["tasks"]
-    m["undergrad_only"] = m.get("undergrad_only") or j.get("undergrad_only", False)
+    m["wrong_degree"] = m.get("wrong_degree") or j.get("wrong_degree", False)
     for source, day in j["received"].items():  # earliest alert email per source
         prev = m["received"].get(source)
         m["received"][source] = min(prev, day) if prev else day

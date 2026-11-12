@@ -110,6 +110,15 @@ GRAD_TEXT_PATTERNS = [
     r"\b(ms|mba|mfa|mdes|mhci)\b",
     r"\bph\.?\s?d\b",
 ]
+# Descriptions that ask only for PhD students ("Currently pursuing a PhD in statistics")
+# are skipped too, unless they also mention a bachelor's or master's.
+PHD_TEXT_PATTERNS = [
+    r"(pursuing|enrolled in|working towards?)[^.\n]{0,40}\bph\.?\s?d\b",
+]
+NON_PHD_TEXT_PATTERNS = [
+    r"\bbachelor", r"\bmaster(['’]?s)?\b", r"undergrad",
+    r"\b(bs|ba|ms|mba|msc|bsc|mfa|mdes|mhci)\b",
+]
 
 # A title must match one of these to count as an internship.
 INTERN_PATTERNS = [
