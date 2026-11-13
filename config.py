@@ -179,6 +179,8 @@ NO_SPONSORSHIP_JOBS = ["cna insurance|technology intern program agile product de
 COMPANY_ALIASES = {
     "activision blizzard": "activision", "raven software": "activision",
     "treyarch": "activision", "blizzard": "activision", "doordash": "doordash usa",
+    # Match Group's Lever board; Jobright lists the same jobs as "Match" or "Tinder".
+    "match": "match group", "tinder": "match group",
 }
 
 # Display names for boards whose slug isn't the company name.
