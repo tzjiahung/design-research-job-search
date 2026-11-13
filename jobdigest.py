@@ -1459,6 +1459,7 @@ def merge(jobs):
             continue
         company = norm(j["company"])
         key = f"{config.COMPANY_ALIASES.get(company, company)}|{norm(j['title'])}"
+        key = config.SAME_JOBS.get(key, key)
         m = merged.setdefault(key, dict(j, key=key, regions=[], links={}, received={},
                                         tasks=set()))
         absorb(m, dict(j, regions=regions, links={j["source"]: j["url"]},

@@ -176,6 +176,12 @@ NO_SPONSORSHIP_JOBS = ["cna insurance|technology intern program agile product de
                        "sequoia|ui ux software intern summer",  # US citizens only
                        "optimum|intern product design"]
 
+# The same job under a different title on another board: {new Key: Key already in the sheet}.
+SAME_JOBS = {
+    # Lenny's Jobs says "Design", PTC's posting (via Jobright) says "Designer".
+    "ptc|ui ux design intern summer": "ptc|ui ux designer intern summer",
+}
+
 COMPANY_ALIASES = {
     "activision blizzard": "activision", "raven software": "activision",
     "treyarch": "activision", "blizzard": "activision", "doordash": "doordash usa",
