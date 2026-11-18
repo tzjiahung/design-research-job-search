@@ -1309,6 +1309,7 @@ def from_email_alerts():
                 for j in parser(body):
                     j["received"] = received
                     out.append(j)
+    check_degree(out)
     return out
 
 
@@ -1361,6 +1362,53 @@ def posting_gone(url):
         return exc.code in (404, 410)
     except Exception:
         return False
+
+
+LINKEDIN_JOB_RE = re.compile(r"//www\.linkedin\.com/jobs/view/(\d+)")
+
+
+def quick_get(url, accept="application/json"):
+    """One try, short timeout: used for many small lookups where a miss is fine."""
+    req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA, "Accept": accept})
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        return resp.read().decode("utf-8", "replace")
+
+
+def posting_text(url):
+    """The description behind an alert's link, or "" when it can't be read. Handshake
+    needs a login and Jobright answers scripts with a bot check, so those are skipped;
+    known undergrad-only Jobright jobs go in config.WRONG_DEGREE_JOBS instead."""
+    try:
+        if m := LINKEDIN_JOB_RE.search(url):
+            page = quick_get(f"https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{m[1]}",
+                             "text/html")
+            desc = re.search(r'class="description__text description__text--rich"(.*?)'
+                             r'(?:class="description__job-criteria-list"|$)', page, re.S)
+            return strip_html(desc[1]) if desc else ""
+        if m := GREENHOUSE_JOB_RE.search(url):
+            j = json.loads(quick_get(f"https://boards-api.greenhouse.io/v1/boards/{m[1]}/jobs/{m[2]}"))
+            return strip_html(j.get("content"))
+        if m := LEVER_JOB_RE.search(url):
+            j = json.loads(quick_get(f"https://api.lever.co/v0/postings/{m[1]}/{m[2]}"))
+            return " ".join([j.get("descriptionPlain", ""), j.get("additionalPlain", "")]
+                            + [strip_html(l.get("content", "")) for l in j.get("lists", [])])
+        if m := WORKDAY_JOB_RE.search(url):
+            j = json.loads(quick_get(f"https://{m[1]}.{m[2]}.myworkdayjobs.com/wday/cxs/"
+                                     f"{m[1]}/{m[3]}/job/{m[4]}"))
+            return strip_html(j.get("jobPostingInfo", {}).get("jobDescription"))
+    except Exception:
+        pass  # unreadable: keep the job
+    return ""
+
+
+def check_degree(jobs):
+    """Alert emails carry no description, so read the posting each one links to and mark
+    undergrad-only or PhD-only roles; merge() then drops them and their other copies."""
+    urls = sorted({j["url"] for j in jobs})
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        texts = dict(zip(urls, pool.map(posting_text, urls)))
+    for j in jobs:
+        j["wrong_degree"] = j["wrong_degree"] or described(texts[j["url"]]).wrong_degree
 
 
 def from_simplify():
@@ -1468,7 +1516,8 @@ def merge(jobs):
     fold_shortened_alerts(merged)
     # One board's description saying undergrads only (or PhDs only) rules out its
     # alert-email copies too.
-    merged = {k: m for k, m in merged.items() if not m.get("wrong_degree")}
+    merged = {k: m for k, m in merged.items()
+              if not m.get("wrong_degree") and k not in config.WRONG_DEGREE_JOBS}
     for key in config.NO_SPONSORSHIP_JOBS:
         if key in merged:
             merged[key]["sponsorship"] = "No sponsorship"

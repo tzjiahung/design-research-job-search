@@ -176,10 +176,19 @@ NO_SPONSORSHIP_JOBS = ["cna insurance|technology intern program agile product de
                        "sequoia|ui ux software intern summer",  # US citizens only
                        "optimum|intern product design"]
 
+# Jobs whose posting asks for undergrads only (or PhDs only) but that we only hear about
+# through alert emails we can't read the posting for (Jobright blocks scripts).
+WRONG_DEGREE_JOBS = {
+    "jewelers mutual group|ux research intern summer of",
+    "princess cruises|intern ux design",  # also listed as Holland America Line
+}
+
 # The same job under a different title on another board: {new Key: Key already in the sheet}.
 SAME_JOBS = {
     # Lenny's Jobs says "Design", PTC's posting (via Jobright) says "Designer".
     "ptc|ui ux design intern summer": "ptc|ui ux designer intern summer",
+    # Jobright lists one Carnival posting under both brands (the text says "Princess").
+    "holland america line|intern ux design": "princess cruises|intern ux design",
 }
 
 COMPANY_ALIASES = {
