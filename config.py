@@ -162,7 +162,7 @@ ASHBY = [
     "notion", "linear", "ramp", "openai", "perplexity", "miro", "plaid", "wealthsimple",
     "patreon", "Superhuman Platform Inc", "mobbin.com",
     "whoop", "eightsleep", "skydio", "1x", "wayve", "harvey", "amplify",
-    "runway-ml", "n8n",
+    "runway-ml", "n8n", "abridge",
     # sports / fitness apps
     "strava", "tonal", "runna", "ladder",
 ]
@@ -405,7 +405,7 @@ INDUSTRIES = {
         "Activision", "Aviagames", "CHAO.S PR", "Disney", "Dow Jones", "NBCUniversal",
         "Nintendo", "Roblox", "The New York Times", "Twitch",
     ],
-    "Healthcare & Medical": ["Pfizer", "Philips", "Stryker"],
+    "Healthcare & Medical": ["Abridge", "Pfizer", "Philips", "Stryker"],
     "Energy & Utilities": ["American Electric Power", "Duke Energy"],
     "Airlines & Travel": ["Delta Air Lines", "Southwest Airlines", "United Airlines"],
     "Consulting & Services": [
