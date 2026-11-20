@@ -113,7 +113,7 @@ GRAD_TEXT_PATTERNS = [
 # Descriptions that ask only for PhD students ("Currently pursuing a PhD in statistics")
 # are skipped too, unless they also mention a bachelor's or master's.
 PHD_TEXT_PATTERNS = [
-    r"(pursuing|enrolled in|working towards?)[^.\n]{0,40}\bph\.?\s?d\b",
+    r"(pursuing|enrolled in|working towards?|in (the )?process of obtaining)[^.\n]{0,80}\bph\.?\s?d\b",
 ]
 NON_PHD_TEXT_PATTERNS = [
     r"\bbachelor", r"\bmaster(['’]?s)?\b", r"undergrad",
