@@ -552,6 +552,13 @@ def from_apple():
 META_DOC_ID = "27506805582236862"
 
 
+def meta_phd_only(j):
+    """Meta files PhD-only internships under the "Internship - PhD" team; the search
+    results carry no description, so this is the only degree hint we get."""
+    teams = [t for t in j.get("teams", []) if re.search(r"internship|university grad", t, re.I)]
+    return bool(teams) and all(re.search(r"\bph\.?d\b", t, re.I) for t in teams)
+
+
 def from_meta():
     opener = session()
     headers = {"User-Agent": BROWSER_UA, "Accept": "text/html,application/xhtml+xml",
@@ -584,7 +591,7 @@ def from_meta():
             body = r.read().decode()
         data = json.loads(body.replace("for (;;);", "", 1))["data"]["job_search_with_featured_jobs"]
         for j in data.get("all_jobs", []) + data.get("featured_jobs", []):
-            if is_design_internship(j.get("title", "")):
+            if is_design_internship(j.get("title", "")) and not meta_phd_only(j):
                 found[j["id"]] = j
     return [job("Meta", j["title"], f"https://www.metacareers.com/jobs/{jid}",
                 j.get("locations", []), "Meta", "Not stated")
