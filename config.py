@@ -323,6 +323,7 @@ RADANCY = [
 ICIMS = [
     {"company": "Cotiviti", "base": "https://careers-cotiviti.icims.com"},
     {"company": "Cotiviti", "base": "https://globalcareers-cotiviti.icims.com"},
+    {"company": "Allegis Group", "base": "https://careers-allegisgroup.icims.com"},
 ]
 PHENOM = [
     {"company": "Honda", "base": "https://careers.honda.com"},
